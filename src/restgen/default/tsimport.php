@@ -31,6 +31,7 @@ $tableSchema = $params['tableSchema'];
 //$actionParamComments = $generator->generateActionParamComments();
 
 $AllTypes = [];
+$AllTypesGETFields = [];
 
 ?>
 import REST, { Rows, SavedObject } from 'flamerest';
@@ -130,7 +131,7 @@ $default = $default === '' ? $default = "''" : $default;
     }
 
    $AllTypes[]= $column->name .($column->isPrimaryKey || $column->defaultValue !== null || $column->allowNull ? '?' : '') .": ". $type;
-
+   $AllTypesGETFields[] = $column->name . '?: string';
 
    echo ($default === 'undefined' ? '!' : '').": ".$type.$relType.($column->allowNull ? ' | null ' : '')."";
 
@@ -143,7 +144,7 @@ $default = $default === '' ? $default = "''" : $default;
      * @param fields поля, которые надо вернуть [если не указаны, вернёт все доступные]
      * @returns
      */
-    static async one(IDOrWhere: object | number | string, fields:object|null = null): Promise<<?= $controllerClass ?>|null> {
+    static async one(IDOrWhere: object | number | string, fields: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string> | null = null): Promise<<?= $controllerClass ?>|null> {
         return REST.one(this.tableName, IDOrWhere, fields, this.primaryKeys[0]);
     }
 
@@ -152,7 +153,7 @@ $default = $default === '' ? $default = "''" : $default;
      * @param params
      * @returns
      */
-    static async all(params?: { where?: object, fields?: object | Array<string>, extfields?: object | Array<string>, sort?: Array<string>, page?: number, perPage?: number, tree?: number }): Promise<Rows<<?= $controllerClass ?>>> {
+    static async all(params?: { where?: object, fields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, extfields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, sort?: Array<string>, page?: number, perPage?: number, tree?: number }): Promise<Rows<<?= $controllerClass ?>>> {
         return REST.all<<?= $controllerClass ?>>(this.tableName, params);
     }
 
