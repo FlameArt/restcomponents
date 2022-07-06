@@ -32,6 +32,7 @@ $tableSchema = $params['tableSchema'];
 
 $AllTypes = [];
 $AllTypesGETFields = [];
+$sortFields = [];
 
 ?>
 import REST, { Rows, SavedObject } from 'flamerest';
@@ -128,6 +129,9 @@ foreach ($tableSchema->columns as $column) {
    $AllTypesAllFields[] = $column->name . ': ' . ($cleanRelType === '' ? "''" : $cleanRelType . ".Fields");
     $DefaultClassesStr[] = '    public '.$column->name.': string ' .($cleanRelType === '' ? "" : " | " . $cleanRelType). ' = "";';
 
+   $sortFields[] = '"'.$column->name.'"';
+   $sortFields[] = '"-'.$column->name.'"';
+
    $GeneratedFieldsStr.= ($default === 'undefined' ? '!' : '') . ": " . $type . $relType . ($column->allowNull ? ' | null ' : '') . "";
 
    $GeneratedFieldsStr .= $default === 'undefined' ? '' : ' = ' . $default . ';';
@@ -180,7 +184,7 @@ export default class Generated<?= $controllerClass ?> {
      * @param params
      * @returns
      */
-    static async all(params?: { where?: object, fields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, extfields?: object | Array<string>, sort?: Array<string>, page?: number, perPage?: number, tree?: number }): Promise<Rows<<?= $controllerClass ?>>> {
+    static async all(params?: { where?: object, fields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, extfields?: object | Array<string>, sort?: Array<<?= implode("|", $sortFields) ?>>, page?: number, perPage?: number, tree?: number }): Promise<Rows<<?= $controllerClass ?>>> {
         return REST.all<<?= $controllerClass ?>>(this.tableName, params);
     }
 
