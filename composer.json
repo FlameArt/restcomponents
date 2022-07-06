@@ -1,0 +1,51 @@
+{
+    "name": "flameart/rest",
+    "description": "REST components for Yii2",
+    "homepage": "https://github.com/FlameArt",
+    "type": "library",
+    "keywords": [
+        "php",
+        "rest",
+        "yii2",
+        "controller",
+        "gii"
+    ],
+    "authors": [
+        {
+            "name": "Paveliev Nicolai",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "suggest": {},
+    "autoload": {
+        "psr-4": {
+            "flameart\\rest\\": "src"
+        }
+    },
+
+    "minimum-stability": "dev",
+    "require": {
+        "php": "7.0",
+        "yiisoft/yii2": "~2.0.8"
+    },
+    "require-dev": {
+        "yiisoft/yii2-gii": "~2.2.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer" : true
+        },
+        "process-timeout": 1800,
+        "fxp-asset": {
+            "enabled": false
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ]
+}
+
