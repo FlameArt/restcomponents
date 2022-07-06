@@ -1,7 +1,7 @@
 <?php
 
 
-namespace common\models\behaviors\RelationBehaviors\actions;
+namespace flameart\rest\behaviors\RelationBehaviors\actions;
 
 
 
@@ -12,7 +12,7 @@ use yii\helpers\Json;
 use yii\rest\Action;
 use yii\web\ForbiddenHttpException;
 use yii\web\ServerErrorHttpException;
-use common\models\behaviors\UploadBehavior;
+use flameart\rest\behaviors\UploadBehavior;
 
 /**
  * UpdateAction implements the API endpoint for updating a model.

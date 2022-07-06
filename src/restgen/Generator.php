@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace rest\gii\restgen;
+namespace flameart\rest\restgen;
 
 use Yii;
 use yii\db\ActiveQuery;

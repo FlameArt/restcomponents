@@ -6,7 +6,7 @@
  * Time: 22:56
  */
 
-namespace common\models\behaviors\RelationBehaviors;
+namespace flameart\rest\behaviors\RelationBehaviors;
 
 
 /**

@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2015 PaulZi <pavel.zimakoff@gmail.com>
  * @license MIT (https://github.com/paulzi/yii2-adjacency-list/blob/master/LICENSE)
  */
-namespace common\models\behaviors\RelationBehaviors;
+namespace flameart\rest\behaviors\RelationBehaviors;
 use Yii;
 use yii\base\Behavior;
 use yii\base\Exception;

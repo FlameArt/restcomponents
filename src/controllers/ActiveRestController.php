@@ -3,7 +3,7 @@
 namespace flameart\rest\controllers;
 
 // Imports
-use common\models\behaviors\RelationBehaviors\MaterializedPathBehavior;
+use flameart\rest\behaviors\RelationBehaviors\MaterializedPathBehavior;
 use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\helpers\Json;

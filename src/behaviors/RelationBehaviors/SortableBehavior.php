@@ -6,7 +6,7 @@
  * Time: 23:01
  */
 
-namespace common\models\behaviors\RelationBehaviors;
+namespace flameart\rest\behaviors\RelationBehaviors;
 
 use yii\base\Behavior;
 use yii\db\ActiveQuery;

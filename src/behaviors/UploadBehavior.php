@@ -1,7 +1,7 @@
 <?php
 
 
-namespace common\models\behaviors;
+namespace flameart\rest\behaviors;
 
 
 use yii\db\ActiveRecord;

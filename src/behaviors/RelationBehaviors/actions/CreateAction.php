@@ -5,9 +5,9 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace common\models\behaviors\RelationBehaviors\actions;
+namespace flameart\rest\behaviors\RelationBehaviors\actions;
 
-use common\models\behaviors\UploadBehavior;
+use flameart\rest\behaviors\UploadBehavior;
 use http\Exception\InvalidArgumentException;
 use Yii;
 use yii\base\Model;
