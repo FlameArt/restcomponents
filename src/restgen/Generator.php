@@ -298,8 +298,8 @@ class Generator extends \yii\gii\Generator
          $this->controllerClass = \yii\helpers\Inflector::id2camel($controllerClass, "_");
 
          // Версионирование: создаём контроллеры для каждой из версий, если их нет
-         $GlobalRestConfig = ('rest\controllers\GlobalRestConfig')();
-         $versions = $GlobalRestConfig::versions;
+         $GlobalRestConfigClass = 'rest\controllers\GlobalRestConfig';
+         $versions = ($GlobalRestConfigClass)::versions;
 
          foreach ($versions as $version) {
 

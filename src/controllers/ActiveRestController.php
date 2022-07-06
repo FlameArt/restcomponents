@@ -551,7 +551,8 @@ class ActiveRestController extends ActiveController
       }
 
       // Отдаём ActiveDataProvider, который поддерживает авто-пагинацию и сортировку
-      return new ActiveDataProviderExt([
+      $ExtendedController = 'rest\controllers\ActiveDataProviderExt';
+      return new $ExtendedController([
          'query' => $DB,
          'pagination' => $pagination,
          'isCacheCount' => in_array(\Yii::$app->controller->id, $this->cachePaginationForPages)
