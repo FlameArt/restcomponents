@@ -137,6 +137,7 @@ class ActiveRestController extends ActiveController
 
       // TODO: get One запись надо убрать все лишние запросы на count итд
       // SEC: запрос поля типа звёздочка
+      // TODO: extfields + fields
 
       ini_set('memory_limit', -1);
       set_time_limit(-1);

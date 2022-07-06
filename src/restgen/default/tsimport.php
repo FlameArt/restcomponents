@@ -57,6 +57,90 @@ foreach ($importList as $rName) echo "import $rName from '@models/$rName';\n";
 
 ?>
 
+<?php
+
+// ГЕНЕРИМ ПОЛЯ
+$GeneratedFieldsStr = "";
+foreach ($tableSchema->columns as $column) {
+   $GeneratedFieldsStr .= "\n    public " . $column->name;
+
+   $default = '';
+   $type = 'string';
+   switch ($column->type) {
+      case 'string':
+      case 'char':
+      case 'text':
+         $type = 'string';
+         $default = "";
+         break;
+      case 'boolean':
+         $type = 'boolean';
+         $default = 'false';
+         break;
+      case 'smallint':
+      case 'integer':
+      case 'bigint':
+      case 'float':
+      case 'decimal':
+         $type = 'number';
+         $default = 0;
+         break;
+      case 'datetime':
+      case 'timestamp':
+      case 'time':
+      case 'date':
+         $type = 'string';
+         $default = "";
+         break;
+      case 'binary':
+         $type = 'object';
+         $default = "{}";
+         break;
+      case 'money':
+         $type = 'number';
+         $default = "0";
+         break;
+      case 'json':
+         $type = 'any';
+         $default = "";
+   }
+
+   $default = $default === '' ? $default = "''" : $default;
+
+   if (in_array($column->name, $filesFields)) {
+      $default = "ref($default)";
+      $type = 'any';
+   } else $default = 'undefined';
+
+
+   // Поле с релятивным типом
+   $relType = "";
+   $cleanRelType = "";
+   if (array_key_exists($column->name, $related)) {
+      $rName = str_replace('common\\models\\DB\\', "", $related[$column->name]['class']);
+      $imports = "import $rName from './$rName';";
+      $relType = " & $rName";
+      $cleanRelType = $rName;
+   }
+
+   $AllTypes[] = $column->name . ($column->isPrimaryKey || $column->defaultValue !== null || $column->allowNull ? '?' : '') . ": " . $type;
+   $AllTypesGETFields[] = $column->name . '?: string ' .($cleanRelType === '' ? "" : " | " . $cleanRelType);
+   $AllTypesAllFields[] = $column->name . ': ' . ($cleanRelType === '' ? "''" : $cleanRelType . ".Fields");
+    $DefaultClassesStr[] = '    public '.$column->name.': string ' .($cleanRelType === '' ? "" : " | " . $cleanRelType). ' = "";';
+
+   $GeneratedFieldsStr.= ($default === 'undefined' ? '!' : '') . ": " . $type . $relType . ($column->allowNull ? ' | null ' : '') . "";
+
+   $GeneratedFieldsStr .= $default === 'undefined' ? '' : ' = ' . $default . ';';
+
+}
+?>
+
+class <?= $params['tableName'] ?>FieldsDefault {
+<?= implode("\n", $DefaultClassesStr)?>
+
+}
+
+
 export default class Generated<?= $controllerClass ?> {
 
     /**
@@ -72,71 +156,14 @@ export default class Generated<?= $controllerClass ?> {
     /**
      * Поля
      */
-<?php foreach ($tableSchema->columns as $column): ?>
-    <?= "public ". $column->name ?><?php
-
-   $default = '';
-   $type = 'string';
-   switch ($column->type) {
-      case 'string':
-      case 'char':
-      case 'text':
-          $type = 'string';
-          $default = "";
-          break;
-      case 'boolean':
-          $type = 'boolean';
-          $default = 'false';
-          break;
-      case 'smallint':
-      case 'integer':
-      case 'bigint':
-      case 'float':
-      case 'decimal':
-          $type = 'number';
-          $default = 0;
-          break;
-      case 'datetime':
-      case 'timestamp':
-      case 'time':
-      case 'date':
-          $type = 'string';
-          $default = "";
-          break;
-      case 'binary':
-          $type = 'object';
-          $default = "{}";
-          break;
-      case 'money':
-          $type = 'number';
-          $default = "0";
-          break;
-      case 'json':
-          $type = 'any';
-          $default = "";
-}
-
-$default = $default === '' ? $default = "''" : $default;
-
-   if(in_array($column->name, $filesFields)) {$default = "ref($default)"; $type = 'any';}
-   else $default = 'undefined';
+<?= $GeneratedFieldsStr ?>
 
 
-    // Поле с релятивным типом
-    $relType = "";
-    if(array_key_exists($column->name, $related)) {
-        $rName = str_replace('common\\models\\DB\\', "", $related[$column->name]['class']);
-        $imports = "import $rName from './$rName';";
-        $relType = " & $rName";
-    }
+    /**
+     * Набор всех полей для быстрого встраивания в функции получения
+     */
+    public static Fields = (assign: object = {}) => Object.assign(new <?= $params['tableName'] ?>FieldsDefault, assign);
 
-   $AllTypes[]= $column->name .($column->isPrimaryKey || $column->defaultValue !== null || $column->allowNull ? '?' : '') .": ". $type;
-   $AllTypesGETFields[] = $column->name . '?: string';
-
-   echo ($default === 'undefined' ? '!' : '').": ".$type.$relType.($column->allowNull ? ' | null ' : '')."";
-
-   ?><?= $default === 'undefined' ? '' : ' = '.$default ?>;
-<?php endforeach; ?>
 
     /**
      * Получить одну запись
@@ -153,7 +180,7 @@ $default = $default === '' ? $default = "''" : $default;
      * @param params
      * @returns
      */
-    static async all(params?: { where?: object, fields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, extfields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, sort?: Array<string>, page?: number, perPage?: number, tree?: number }): Promise<Rows<<?= $controllerClass ?>>> {
+    static async all(params?: { where?: object, fields?: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string>, extfields?: object | Array<string>, sort?: Array<string>, page?: number, perPage?: number, tree?: number }): Promise<Rows<<?= $controllerClass ?>>> {
         return REST.all<<?= $controllerClass ?>>(this.tableName, params);
     }
 
