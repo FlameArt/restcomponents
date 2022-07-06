@@ -69,19 +69,19 @@ class ActiveRestController extends ActiveController
       $actions = parent::actions();
       $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
       $actions['create']= [
-         'class' => 'common\models\behaviors\RelationBehaviors\actions\CreateAction',
+         'class' => 'flameart\rest\behaviors\RelationBehaviors\actions\CreateAction',
          'modelClass' => $this->modelClass,
          'checkAccess' => [$this, 'checkAccess'],
          'scenario' => $this->createScenario,
       ];
       $actions['update']= [
-         'class' => 'common\models\behaviors\RelationBehaviors\actions\UpdateAction',
+         'class' => 'flameart\rest\behaviors\RelationBehaviors\actions\UpdateAction',
          'modelClass' => $this->modelClass,
          'checkAccess' => [$this, 'checkAccess'],
          'scenario' => $this->updateScenario,
       ];
       $actions['delete']= [
-         'class' => 'common\models\behaviors\RelationBehaviors\actions\DeleteAction',
+         'class' => 'flameart\rest\behaviors\RelationBehaviors\actions\DeleteAction',
          'modelClass' => $this->modelClass,
          'checkAccess' => [$this, 'checkAccess'],
       ];

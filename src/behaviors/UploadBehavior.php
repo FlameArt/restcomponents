@@ -10,7 +10,7 @@ use yii\web\UploadedFile;
 
 /**
  * Позволяет автоматически загружать и обновлять файлы, помечая новые имена в соответствующих полях БД
- * @package common\models\behaviors
+ * @package flameart\rest\behaviors
  */
 class UploadBehavior extends \yii\base\Behavior
 {
