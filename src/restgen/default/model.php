@@ -21,7 +21,7 @@ echo "<?php\n";
 namespace <?= $generator->ns ?>\models;
 
 use Yii;
-use common\models\behaviors\UploadBehavior;
+use flameart\rest\behaviors\UploadBehavior;
 
 
 /**

@@ -32,8 +32,8 @@ use Yii;
 use yii\db\Expression;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
-use common\models\behaviors\UploadBehavior;
-use common\models\behaviors\RelationBehaviors\MaterializedPathBehavior;
+use flameart\rest\behaviors\UploadBehavior;
+use flameart\rest\behaviors\RelationBehaviors\MaterializedPathBehavior;
 
 
 
