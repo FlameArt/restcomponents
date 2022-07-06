@@ -1,7 +1,7 @@
 {
-    "name": "flameart/rest",
+    "name": "flameart/restcomponents",
     "description": "REST components for Yii2",
-    "homepage": "https://github.com/FlameArt",
+    "homepage": "https://github.com/FlameArt/restcomponents",
     "type": "library",
     "keywords": [
         "php",
@@ -48,4 +48,3 @@
         }
     ]
 }
-
