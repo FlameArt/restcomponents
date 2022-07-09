@@ -36,7 +36,9 @@ $sortFields = [];
 
 ?>
 import REST, { Rows, SavedObject } from 'flamerest';
+import DefaultGeneratedRESTTable from './Default';
 import { ref, watch } from 'vue';
+
 
 import <?=$controllerClass?> from '@models/<?=$controllerClass?>';
 
@@ -145,12 +147,12 @@ class <?= $params['tableName'] ?>FieldsDefault {
 }
 
 
-export default class Generated<?= $controllerClass ?> {
+export default class Generated<?= $controllerClass ?> extends DefaultGeneratedRESTTable {
 
     /**
      * Название таблицы
      */
-    private static tableName: string = "<?= $params['tableName'] ?>";
+    public static tableName: string = "<?= $params['tableName'] ?>";
 
     /**
      * Ключевые поля

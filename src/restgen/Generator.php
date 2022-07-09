@@ -320,6 +320,7 @@ class Generator extends \yii\gii\Generator
          if (class_exists(('common\\models\\DB\\' . $this->controllerClass))) {
             $controllerFileExt = Yii::getAlias('@rest') . "/TSImports/generated/Generated" . $this->controllerClass . ".ts";
             $controllerExtendedFileExt = Yii::getAlias('@rest') . "/TSImports/" . $this->controllerClass . ".ts";
+            $controllerDefaultFileExt = Yii::getAlias('@rest') . "/TSImports/Default.ts";
             $nClass = ('common\\models\\DB\\' . $this->controllerClass);
             $testClass = new $nClass;
             $crules = $testClass->rulesExt();
@@ -331,6 +332,8 @@ class Generator extends \yii\gii\Generator
             $files[] = new CodeFile($controllerFileExt, $this->render('tsimport.php', ['tableName' => $tableName, 'controllerClass' => $this->controllerClass, 'params' => $params, 'primaryKey' => $db->getTableSchema($tableName)->primaryKey, 'filesFields' => $filesFields, 'related' => $related]));
             if(!file_exists($controllerExtendedFileExt))
                $files[] = new CodeFile($controllerExtendedFileExt, $this->render('tsimportext.php', ['tableName' => $tableName, 'controllerClass' => $this->controllerClass, 'params' => $params, 'primaryKey' => $db->getTableSchema($tableName)->primaryKey, 'filesFields' => $filesFields, 'related' => $related]));
+            if(!file_exists($controllerDefaultFileExt))
+               $files[] = new CodeFile($controllerDefaultFileExt, $this->render('tsdefault.php', ['tableName' => $tableName, 'controllerClass' => $this->controllerClass, 'params' => $params, 'primaryKey' => $db->getTableSchema($tableName)->primaryKey, 'filesFields' => $filesFields, 'related' => $related]));
          }
 
       }
