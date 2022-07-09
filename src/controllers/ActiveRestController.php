@@ -138,6 +138,7 @@ class ActiveRestController extends ActiveController
       // TODO: get One запись надо убрать все лишние запросы на count итд
       // SEC: запрос поля типа звёздочка
       // TODO: extfields + fields
+      // TODO: баг, он где-то смешивает поля с одинаковым названием в глубине >1 в разных моделях
 
       ini_set('memory_limit', -1);
       set_time_limit(-1);
@@ -287,8 +288,8 @@ class ActiveRestController extends ActiveController
                   $classTable = (new $relatedTable['class']);
 
                   $joinAlias = "`__Alias__".count($joinFields)."__".$relatedTable['table']."__`";
-                  $joinPath = $joinPath.".".$key;
-                  $joinAliasesAll[$joinPath]=count($joinFields);
+                  $newJoinPath = $joinPath.".".$key;
+                  $joinAliasesAll[$newJoinPath]=count($joinFields);
 
                   $joinFields[] = [
                      $key,
@@ -307,7 +308,7 @@ class ActiveRestController extends ActiveController
 
                   $hasRelation = true;
 
-                  $recursive_join($value, $classTable, str_replace("`", "", $joinAlias), $joinPath);
+                  $recursive_join($value, $classTable, str_replace("`", "", $joinAlias), $newJoinPath);
 
                } //обычные поля вместе с релативными
                else {
@@ -342,11 +343,11 @@ class ActiveRestController extends ActiveController
 
       $recursive_output = function (&$format, &$row, &$filledRow, &$current_table, &$rowTables, &$tree_relates, &$filledLinks, &$isAppend, $joinPath) use (&$recursive_output, &$AllTables, &$joinAliasesAll) {
 
-         foreach ($format as $key => $value) {
+         foreach ($format as $key => &$value) {
             if (is_array($value)) {
                $filledRow[$key] = [];
-               $joinPath = $joinPath.".".$key;
-               $recursive_output($value, $row, $filledRow[$key], $AllTables[$current_table]['related'][$key]['table'], $rowTables, $tree_relates, $filledLinks, $isAppend, $joinPath);
+               $newJoinPath = $joinPath.".".$key;
+               $recursive_output($value, $row, $filledRow[$key], $AllTables[$current_table]['related'][$key]['table'], $rowTables, $tree_relates, $filledLinks, $isAppend, $newJoinPath);
             } else {
                $key = is_numeric($key) ? $value : $key;
 
