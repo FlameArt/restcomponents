@@ -341,33 +341,35 @@ class ActiveRestController extends ActiveController
 
       $recursive_output = function (&$format, &$row, &$filledRow, &$current_table, &$rowTables, &$tree_relates, &$filledLinks, &$isAppend, $joinPath) use (&$recursive_output, &$AllTables, &$joinAliasesAll) {
 
+         // find alias
+         $findedTable = $current_table;
+         if(strlen($joinPath)>0) {
+
+            $findedAliasN = array_key_exists($joinPath, $joinAliasesAll) ? $joinAliasesAll[$joinPath] : null;
+            if($findedAliasN === null) throw  new ErrorException("Неизвестное поведение при подборе алиаса");
+
+            foreach ($rowTables as $rtKey=>$rtValue) {
+               if(strpos($rtKey, "__Alias__")!== false) {
+                  $splittedAlias = explode("__", $rtKey);
+                  if(intval($splittedAlias[2]) === $findedAliasN) {
+                     $findedTable = $rtKey;
+                     break;
+                  }
+
+               }
+            }
+         }
+
          foreach ($format as $key => &$value) {
             if (is_array($value)) {
                $filledRow[$key] = [];
                $newJoinPath = $joinPath.".".$key;
-               $recursive_output($value, $row, $filledRow[$key], $AllTables[$current_table]['related'][$key]['table'], $rowTables, $tree_relates, $filledLinks, $isAppend, $newJoinPath);
+               if (isset($rowTables[$findedTable]) && array_key_exists($key,$rowTables[$findedTable]) && $rowTables[$findedTable][$key]===null)
+                  $filledRow[$key] = null;
+               else
+                  $recursive_output($value, $row, $filledRow[$key], $AllTables[$current_table]['related'][$key]['table'], $rowTables, $tree_relates, $filledLinks, $isAppend, $newJoinPath);
             } else {
                $key = is_numeric($key) ? $value : $key;
-
-               // find alias
-               $findedTable = $current_table;
-               if(strlen($joinPath)>0) {
-
-                  $findedAliasN = array_key_exists($joinPath, $joinAliasesAll) ? $joinAliasesAll[$joinPath] : null;
-                  if($findedAliasN === null) throw  new ErrorException("Неизвестное поведение при подборе алиаса");
-
-                  foreach ($rowTables as $rtKey=>$rtValue) {
-                     if(strpos($rtKey, "__Alias__")!== false) {
-                        $splittedAlias = explode("__", $rtKey);
-                        if(intval($splittedAlias[2]) === $findedAliasN) {
-                           $findedTable = $rtKey;
-                           break;
-                        }
-
-                     }
-                  }
-               }
-
 
                if (isset($rowTables[$findedTable]) && array_key_exists($key,$rowTables[$findedTable])) {
                   $filledRow[$key] = $rowTables[$findedTable][$key];
