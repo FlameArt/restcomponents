@@ -196,6 +196,7 @@ export default class Generated<?= $controllerClass ?> extends DefaultGeneratedRE
      */
     constructor(params?: {<?= implode(", ", $AllTypes) ?>}) {
 
+        super();
         if(params) Object.assign(this, params);
       <?php foreach ($filesFields as $tField):?>
   watch(this.<?=$tField?>, (n, o)=>this.prepare())
