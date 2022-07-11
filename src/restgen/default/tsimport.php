@@ -36,7 +36,7 @@ $sortFields = [];
 
 ?>
 import REST, { Rows, SavedObject } from 'flamerest';
-import RESTTable from './generated/RESTTable';
+import RESTTable from './RESTTable';
 import { ref, watch } from 'vue';
 
 
