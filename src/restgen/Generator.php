@@ -320,7 +320,7 @@ class Generator extends \yii\gii\Generator
          if (class_exists(('common\\models\\DB\\' . $this->controllerClass))) {
             $controllerFileExt = Yii::getAlias('@rest') . "/TSImports/generated/Generated" . $this->controllerClass . ".ts";
             $controllerExtendedFileExt = Yii::getAlias('@rest') . "/TSImports/" . $this->controllerClass . ".ts";
-            $controllerDefaultFileExt = Yii::getAlias('@rest') . "/TSImports/Default.ts";
+            $controllerDefaultFileExt = Yii::getAlias('@rest') . "/TSImports/generated/RESTTable.ts";
             $nClass = ('common\\models\\DB\\' . $this->controllerClass);
             $testClass = new $nClass;
             $crules = $testClass->rulesExt();

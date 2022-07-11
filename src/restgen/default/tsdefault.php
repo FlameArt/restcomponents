@@ -1,2 +1,2 @@
-export default class DefaultGeneratedRESTTable {
+export default class RESTTable {
 }
