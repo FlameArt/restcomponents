@@ -241,6 +241,19 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
         return REST.edit<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, ID, values, tree?.appendTo, tree?.insertAfter, tree?.insertFirst);
     }
 
+
+    /**
+     * Изменить значения через прямой вызов функции
+     * @param params
+     */
+    public async save(): Promise<SavedObject<<?= $controllerClass ?>>> {
+        if (this.primaryKeys.length !== this.primaryKeys.filter(r => this[r] === null).length)
+            return this.create();
+        else
+            return this.edit();
+    }
+
+
     /**
      * Удалить запись или набор записей
      * @param table
