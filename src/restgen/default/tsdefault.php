@@ -11,7 +11,7 @@ export default class RESTTable {
    * @returns
    */
   public static LeftJoin(on: object) {
-    return this.Join(fieldName, on, "left")
+    return this.Join(on, "left")
   }
 
   /**
@@ -20,7 +20,7 @@ export default class RESTTable {
    * @returns
    */
   public static RightJoin(on: object) {
-    return this.Join(fieldName, on, "right")
+    return this.Join(on, "right")
   }
 
   /**
@@ -29,7 +29,7 @@ export default class RESTTable {
    * @returns
    */
   public static InnerJoin(on: object) {
-    return this.Join(fieldName, on, "inner")
+    return this.Join(on, "inner")
   }
 
   /**
