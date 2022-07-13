@@ -243,14 +243,24 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
 
 
     /**
-     * Изменить значения через прямой вызов функции
-     * @param params
+     * Создать или обновить значения
      */
-    public async save(): Promise<SavedObject<<?= $controllerClass ?>>> {
+    public save(): Promise<SavedObject<<?= $controllerClass ?>>> {
         if (this.primaryKeys.length !== this.primaryKeys.filter(r => this[r] === null).length)
             return this.create();
         else
             return this.edit();
+    }
+
+    /**
+     * Создать или обновить значения через прямой вызов функции
+     * @param params
+     */
+    public static save(values: { <?= implode(", ", $AllTypes) ?> }): Promise<SavedObject<<?= $controllerClass ?>>> {
+        if (this.primaryKeys.length !== this.primaryKeys.filter(r => this[r] === null).length)
+            return this.create(values);
+        else
+            return this.edit((this as any)[Content.primaryKeys[0]], values);
     }
 
 
