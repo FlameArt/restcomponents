@@ -4,6 +4,7 @@ namespace flameart\rest\controllers;
 
 // Imports
 use flameart\rest\behaviors\RelationBehaviors\MaterializedPathBehavior;
+use yii\db\Exception;
 use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\helpers\Json;
@@ -263,6 +264,7 @@ class ActiveRestController extends ActiveController
          $joinFields = [];
          $relatedTables = [];
          $joinAliasesAll = []; // пара "путь до ключа"-"номер алиаса"
+         $joinAliasesAllFormat = []; // тут оригинальные форматы вывода (до замены на фактические поля)
 
 
          // Ассоциативный массив или номерной
@@ -271,7 +273,7 @@ class ActiveRestController extends ActiveController
             return array_keys($arr) !== range(0, count($arr) - 1);
          };
 
-         $recursive_join = function ($fields, $table, $tableAlias = null, $joinPath = "") use (&$selectedFields, &$joinFields, &$DBModel, &$hasRelation, &$recursive_join, &$is_assoc, &$joinAliasesAll) {
+         $recursive_join = function (&$fields, $table, $tableAlias = null, $joinPath = "") use (&$selectedFields, &$joinFields, &$DBModel, &$hasRelation, &$recursive_join, &$is_assoc, &$joinAliasesAll, &$AllTables, &$joinAliasesAllFormat) {
 
             foreach ($fields as $key => $value) {
 
@@ -282,12 +284,48 @@ class ActiveRestController extends ActiveController
                } // релятивные поля
                elseif (is_array($value)) {
 
-                  $relatedTable = $table->relatedFields()[$key];
+                  $aliasesArr = [];
+
+                  if(array_key_exists("____joinFilter____", $value) && $value['____joinFilter____']===true) {
+                     $relatedTable = [
+                        'table' => $value['table'],
+                        'class' => $AllTables[$value['table']]['class'],
+                        'key' => null,
+                        'join' => $value,
+                        'alias' => ''
+                     ];
+                  }
+                  else
+                     $relatedTable = $table->relatedFields()[$key];
+
                   $classTable = (new $relatedTable['class']);
 
                   $joinAlias = "`__Alias__".count($joinFields)."__".$relatedTable['table']."__`";
                   $newJoinPath = $joinPath.".".$key;
                   $joinAliasesAll[$newJoinPath]=count($joinFields);
+
+                  $ON_param = '';
+                  $ON_keys = [];
+
+                  if(isset($relatedTable['join'])) {
+                     foreach ($value['on'] as $keyOn=>$valOn) {
+                        if(is_array($valOn))
+                           $valOn =  "`" . ($tableAlias ?? $table::tableName()) . "`." . $valOn['value'];
+
+                        $ON_param.=" AND " . $joinAlias . "." . $keyOn . "=" . $valOn ;
+                        $ON_keys[] = $value['table'] . "." . $keyOn;// TODO: тут опасное присваивание
+                     }
+                     $ON_param = substr($ON_param, 5);
+                     $joinAliasesAllFormat[$newJoinPath] = $value;
+                     $value = $AllTables[$value['table']]['columns'];
+                     $fields[$key] = array_keys( $value );
+                  }
+                  else {
+                     $ON_param = "`" . ($tableAlias ?? $table::tableName()) . "`." . $key . "=" . $joinAlias . "." . $relatedTable['key'];
+                     $ON_keys[] = "`" . $relatedTable['table'] . "`." . $relatedTable['key'];
+                  }
+
+                  // TODO: протестить безопасность по полям на новой механике
 
                   $joinFields[] = [
                      $key,
@@ -295,14 +333,18 @@ class ActiveRestController extends ActiveController
                      // Обычный вариант для проверки полей
                      $relatedTable['table'],
                      "`" . $table::tableName() . "`." . $key . "=" . "`" . $relatedTable['table'] . "`." . $relatedTable['key'],
-                     "`" . $relatedTable['table'] . "`." . $relatedTable['key'],
+                     //"`" . $relatedTable['table'] . "`." . $relatedTable['key'],
+                     $ON_keys,
 
                      // Вариант с алиасами для запроса
                      $joinAlias,
-                     "`" . ($tableAlias ?? $table::tableName()) . "`." . $key . "=" . $joinAlias . "." . $relatedTable['key'],
+                     //str_replace("`","", $joinAlias),
+                     $ON_param,
+                     //[($tableAlias ?? $table::tableName()) . "." . $key => $joinAlias . "." . $relatedTable['key']],
                      $joinAlias . "." . $relatedTable['key'],
 
                   ];
+
 
                   $hasRelation = true;
 
@@ -332,32 +374,30 @@ class ActiveRestController extends ActiveController
          $DB->select($filteredFieldsArr);
 
          // После фильтрации делаем join только одобренных полей
-         foreach ($joinFields as $keyF=>$field)
-            if (in_array(str_replace("`", "", $field[3]), $filteredFields))
+         foreach ($joinFields as $keyF=>$field) {
+            $findedJoin = true;
+            foreach ($field[3] as $joinName) {
+               if (!in_array(str_replace("`", "", $joinName), $filteredFields)) {
+                  throw new Exception("Forbidden fields");
+                  //$findedJoin = false;
+                  //break;
+               }
+            }
+            if($findedJoin)
                $DB->leftJoin($field[1] . " " . $field[4], $field[5], []);
+         }
 
       }
 
 
-      $recursive_output = function (&$format, &$row, &$filledRow, &$current_table, &$rowTables, &$tree_relates, &$filledLinks, &$isAppend, $joinPath) use (&$recursive_output, &$AllTables, &$joinAliasesAll) {
+      $recursive_output = function (&$format, &$row, &$filledRow, $current_table, &$rowTables, &$tree_relates, &$filledLinks, &$isAppend, $joinPath) use (&$recursive_output, &$AllTables, &$joinAliasesAll, &$joinAliasesAllFormat) {
 
          // find alias
          $findedTable = $current_table;
-         if(strlen($joinPath)>0) {
-
-            $findedAliasN = array_key_exists($joinPath, $joinAliasesAll) ? $joinAliasesAll[$joinPath] : null;
-            if($findedAliasN === null) throw  new ErrorException("Неизвестное поведение при подборе алиаса");
-
-            foreach ($rowTables as $rtKey=>$rtValue) {
-               if(strpos($rtKey, "__Alias__")!== false) {
-                  $splittedAlias = explode("__", $rtKey);
-                  if(intval($splittedAlias[2]) === $findedAliasN) {
-                     $findedTable = $rtKey;
-                     break;
-                  }
-
-               }
-            }
+         $findedAliases = $this->findAlias($joinPath, $joinAliasesAll, $rowTables, $current_table);
+         if($findedAliases !== null) {
+            $findedTable = $findedAliases[0];
+            $current_table = $findedAliases[1];
          }
 
          foreach ($format as $key => &$value) {
@@ -366,8 +406,25 @@ class ActiveRestController extends ActiveController
                $newJoinPath = $joinPath.".".$key;
                if (isset($rowTables[$findedTable]) && array_key_exists($key,$rowTables[$findedTable]) && $rowTables[$findedTable][$key]===null)
                   $filledRow[$key] = null;
-               else
-                  $recursive_output($value, $row, $filledRow[$key], $AllTables[$current_table]['related'][$key]['table'], $rowTables, $tree_relates, $filledLinks, $isAppend, $newJoinPath);
+               else {
+
+                  // [Грубый подход] Если все записи - нули, значит связи нет
+                  // т.к. поля, с которыми он должен был сопоставиться - тоже нули (вместе со всеми полями)
+                  // но можно и в $joinAliasesAllFormat поискать только те поля что сопоставляли, хотя это ничего не решает, и даже лучше когда все нули - это гарантирует что записи нет даже если ключ null
+                  $findedNulls = true;
+                  $findedAliasesNextStep = $this->findAlias($newJoinPath, $joinAliasesAll, $rowTables, $current_table);
+                  if($findedAliasesNextStep !== null) {
+                     $findedTableNS = $findedAliasesNextStep[0];
+                     $current_tableNS = $findedAliasesNextStep[1];
+                     foreach ($rowTables[$findedTableNS] as $rtNSKey=>$rtNSVal) {
+                        if($rtNSVal!==null) {$findedNulls = false; break;}
+                     }
+                  }
+                  if($findedNulls)
+                     $filledRow[$key] = null;
+                  else
+                     $recursive_output($value, $row, $filledRow[$key], isset($AllTables[$current_table]['related'][$key]['table']) ? $AllTables[$current_table]['related'][$key]['table'] : null, $rowTables, $tree_relates, $filledLinks, $isAppend, $newJoinPath);
+               }
             } else {
                $key = is_numeric($key) ? $value : $key;
 
@@ -562,6 +619,37 @@ class ActiveRestController extends ActiveController
    }
 
    /**
+    * Поиск алиаса join-поля
+    * @param $joinPath
+    * @param $joinAliasesAll
+    * @param $rowTables
+    * @param $current_table
+    * @return array|null
+    * @throws ErrorException
+    */
+   public function findAlias($joinPath, &$joinAliasesAll, &$rowTables, $current_table) {
+      $findedTable = null;
+      if(strlen($joinPath)>0) {
+
+         $findedAliasN = array_key_exists($joinPath, $joinAliasesAll) ? $joinAliasesAll[$joinPath] : null;
+         if($findedAliasN === null) throw  new ErrorException("Неизвестное поведение при подборе алиаса");
+
+         foreach ($rowTables as $rtKey=>$rtValue) {
+            if(strpos($rtKey, "__Alias__")!== false) {
+               $splittedAlias = explode("__", $rtKey);
+               if(intval($splittedAlias[2]) === $findedAliasN) {
+                  $findedTable = $rtKey;
+                  if($current_table === null) $current_table = $splittedAlias[3];
+                  return [$findedTable, $current_table];
+               }
+
+            }
+         }
+      }
+      return null;
+   }
+
+   /**
     * Расширить поиск по модели
     * @param $model ActiveQuery
     * @param $data array json-запрос, который был получен
@@ -584,5 +672,6 @@ class ActiveRestController extends ActiveController
    {
       return $params;
    }
+
 
 }
