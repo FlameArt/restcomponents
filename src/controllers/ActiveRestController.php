@@ -307,6 +307,8 @@ class ActiveRestController extends ActiveController
                   $ON_param = '';
                   $ON_keys = [];
 
+                  $joinType = "left";
+
                   if(isset($relatedTable['join'])) {
                      foreach ($value['on'] as $keyOn=>$valOn) {
                         if(is_array($valOn))
@@ -317,6 +319,7 @@ class ActiveRestController extends ActiveController
                      }
                      $ON_param = substr($ON_param, 5);
                      $joinAliasesAllFormat[$newJoinPath] = $value;
+                     $joinType = $value['type'];
                      $value = $AllTables[$value['table']]['columns'];
                      $fields[$key] = array_keys( $value );
                   }
@@ -342,6 +345,8 @@ class ActiveRestController extends ActiveController
                      $ON_param,
                      //[($tableAlias ?? $table::tableName()) . "." . $key => $joinAlias . "." . $relatedTable['key']],
                      $joinAlias . "." . $relatedTable['key'],
+
+                     $joinType
 
                   ];
 
@@ -379,12 +384,21 @@ class ActiveRestController extends ActiveController
             foreach ($field[3] as $joinName) {
                if (!in_array(str_replace("`", "", $joinName), $filteredFields)) {
                   throw new Exception("Forbidden fields");
-                  //$findedJoin = false;
-                  //break;
                }
             }
-            if($findedJoin)
-               $DB->leftJoin($field[1] . " " . $field[4], $field[5], []);
+            if($findedJoin) {
+               switch ($field[7]) {
+                  case "left":
+                     $DB->leftJoin($field[1] . " " . $field[4], $field[5], []);
+                     break;
+                  case "right":
+                     $DB->rightJoin($field[1] . " " . $field[4], $field[5], []);
+                     break;
+                  case "inner":
+                     $DB->innerJoin($field[1] . " " . $field[4], $field[5], []);
+                     break;
+               }
+            }
          }
 
       }
