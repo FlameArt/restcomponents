@@ -157,7 +157,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
     /**
      * Ключевые поля
      */
-    private static primaryKeys: string[] = [<?= str_replace("''","", "'".implode("','", $primaryKey)."'") ?>];
+    public static primaryKeys: string[] = [<?= str_replace("''","", "'".implode("','", $primaryKey)."'") ?>];
 
     /**
      * Поля
