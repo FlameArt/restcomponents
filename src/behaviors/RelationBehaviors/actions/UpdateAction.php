@@ -8,6 +8,7 @@ namespace flameart\rest\behaviors\RelationBehaviors\actions;
 use Yii;
 use yii\base\Model;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
 use yii\helpers\Json;
 use yii\rest\Action;
 use yii\web\ForbiddenHttpException;
@@ -29,7 +30,6 @@ class UpdateAction extends Action
     */
    public $scenario = Model::SCENARIO_DEFAULT;
 
-
    /**
     * Updates an existing model.
     * @param string $id the primary key of the model.
@@ -38,12 +38,21 @@ class UpdateAction extends Action
     */
    public function run($id)
    {
+
+      // Создать или сохранить запись
+
       /* @var $model ActiveRecord */
-      $model = $this->findModel($id);
+      if($id!== null)
+         $model = $this->findModel($id);
+      else
+         $model = new $this->modelClass([
+            'scenario' => $this->scenario,
+         ]);
 
       if ($this->checkAccess) {
          call_user_func($this->checkAccess, $this->id, $model);
       }
+
 
       $data = Json::decode(\Yii::$app->request->getRawBody(), true);
 

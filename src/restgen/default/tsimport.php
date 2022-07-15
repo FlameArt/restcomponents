@@ -256,11 +256,11 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * Создать или обновить значения через прямой вызов функции
      * @param params
      */
-    public static save(values: { <?= implode(", ", $AllTypes) ?> }): Promise<SavedObject<<?= $controllerClass ?>>> {
-        if (Generated<?= $controllerClass ?>.primaryKeys.length !== Generated<?= $controllerClass ?>.primaryKeys.filter(r => this[r] === null).length)
+    public static save(obj: Generated<?= $controllerClass ?>|null = null, values: { <?= implode(", ", $AllTypes) ?> }): Promise<SavedObject<<?= $controllerClass ?>>> {
+        if (obj === null || Generated<?= $controllerClass ?>.primaryKeys.length !== Generated<?= $controllerClass ?>.primaryKeys.filter(r => (obj as any)[r] === null).length)
             return this.create(values);
         else
-            return Generated<?= $controllerClass ?>.edit((this as any)[Generated<?= $controllerClass ?>.primaryKeys[0]], values);
+            return Generated<?= $controllerClass ?>.edit((obj as any)[Generated<?= $controllerClass ?>.primaryKeys[0]], values);
     }
 
 
