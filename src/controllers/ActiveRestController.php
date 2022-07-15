@@ -444,13 +444,31 @@ class ActiveRestController extends ActiveController
 
                if (isset($rowTables[$findedTable]) && array_key_exists($key,$rowTables[$findedTable])) {
                   $filledRow[$key] = $rowTables[$findedTable][$key];
-                  if($AllTables[$current_table]['columns'][$key]==='json')
-                     try {
-                        $filledRow[$key] = Json::decode($filledRow[$key], true);
-                     }
-                     catch(\Exception $ex){
-                        $filledRow = null;
-                     }
+                  switch ($AllTables[$current_table]['columns'][$key]) {
+                     case "json":
+                        try {
+                           $filledRow[$key] = Json::decode($filledRow[$key], true);
+                        } catch
+                        (\Exception $ex) {
+                           $filledRow = null;
+                        }
+                        break;
+                     case "integer":
+                     case "smallint":
+                     case "tinyint":
+                     case "mediumint":
+                     case "bigint":
+                     case "bit":
+                     case "number":
+                        $filledRow[$key] = intval($filledRow[$key]);
+                        break;
+                     case "float":
+                        $filledRow[$key] = floatval($filledRow[$key]);
+                        break;
+                     case "double":
+                        $filledRow[$key] = doubleval($filledRow[$key]);
+                        break;
+                  }
                }
             }
          }
