@@ -275,7 +275,7 @@ class ActiveRestController extends ActiveController
 
          $recursive_join = function (&$fields, $table, $tableAlias = null, $joinPath = "") use (&$selectedFields, &$joinFields, &$DBModel, &$hasRelation, &$recursive_join, &$is_assoc, &$joinAliasesAll, &$AllTables, &$joinAliasesAllFormat) {
 
-            foreach ($fields as $key => $value) {
+            foreach ($fields as $key => &$value) {
 
                if (is_numeric($key)) {
                   $selectedFields[($tableAlias ?? "") . ("___" . $table::tableName() . "___" . $value)] = $table::tableName() . "." . $value;
