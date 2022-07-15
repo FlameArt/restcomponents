@@ -246,7 +246,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * Создать или обновить значения
      */
     public save(): Promise<SavedObject<<?= $controllerClass ?>>> {
-        if (Generated<?= $controllerClass ?>.primaryKeys.length !== Generated<?= $controllerClass ?>.primaryKeys.filter(r => this[r] === null).length)
+        if (Generated<?= $controllerClass ?>.primaryKeys.length !== Generated<?= $controllerClass ?>.primaryKeys.filter(r => (this as any)[r] !== null).length)
             return this.create();
         else
             return this.edit();
@@ -257,7 +257,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * @param params
      */
     public static save(obj: Generated<?= $controllerClass ?>|null = null, values: { <?= implode(", ", $AllTypes) ?> }): Promise<SavedObject<<?= $controllerClass ?>>> {
-        if (obj === null || Generated<?= $controllerClass ?>.primaryKeys.length !== Generated<?= $controllerClass ?>.primaryKeys.filter(r => (obj as any)[r] === null).length)
+        if (obj === null || Generated<?= $controllerClass ?>.primaryKeys.length !== Generated<?= $controllerClass ?>.primaryKeys.filter(r => (obj as any)[r] !== null).length)
             return this.create(values);
         else
             return Generated<?= $controllerClass ?>.edit((obj as any)[Generated<?= $controllerClass ?>.primaryKeys[0]], values);
