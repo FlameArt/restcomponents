@@ -275,6 +275,16 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
     }
 
     /**
+     * Удалить эту запись
+     * @param table
+     * @param id
+     * @param byFields
+     */
+    public async delete(): Promise<boolean|Array<any>> {
+        return REST.remove(<?= $controllerClass ?>.tableName, (this as any)[<?= $controllerClass ?>.primaryKeys[0]]);
+    }
+
+    /**
      * Подготовить текущую запись к отправке, загрузить все файлы
      * @returns
      */
