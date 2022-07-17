@@ -58,10 +58,18 @@ class CreateAction extends Action
 
       // Сравниваем полученные для изменения поля с разрешёнными
       $accepted_fields = $model->filterFieldsByRole('edit', $model, false, array_keys($data));
-      if(count($accepted_fields) !== count($data))
+
+      if(count($accepted_fields) === 0)
          throw new ForbiddenHttpException("Forbidden");
 
-      $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+      // Прописываем чистый массив данных [вместо unset], чтобы не проскочили рандомные вариации имён, которые не итерируются
+      // Если есть хоть 1 разрешённое поле для вставки - создаём запись, это поможет не учитывать кастомные поля, которые создаются в JS-моделях
+      $cleanData = [];
+      foreach ($data as $key => $value)
+         if (in_array($key, $accepted_fields)) $cleanData[$key] = $value;
+      $data = $cleanData;
+
+      $model->load($data, '');
 
       $modelClass = null;
       $AllTables = require(\Yii::getAlias("@common") . '/models/DB/models/Tables.php');
@@ -70,40 +78,39 @@ class CreateAction extends Action
       $insertAfter = Yii::$app->request->get('insertAfter');
       $insertFirst = Yii::$app->request->get('insertFirst');
 
-      if( $appendTo !== null ) {
+      if ($appendTo !== null) {
          $appendTo = intval($appendTo);
          $node = null;
-         if($appendTo === 0) {
+         if ($appendTo === 0) {
             $modelClass = $modelClass ?? (new $this->modelClass());
-            $node = $modelClass->find()->andWhere([$modelClass->USER_ATTRIBUTE=>Yii::$app->user->id, $modelClass->behaviors['MaterializedPath']->depthAttribute=> 0])->one();
-            if($node === null) {
+            $node = $modelClass->find()->andWhere([$modelClass->USER_ATTRIBUTE => Yii::$app->user->id, $modelClass->behaviors['MaterializedPath']->depthAttribute => 0])->one();
+            if ($node === null) {
                $node = new $this->modelClass();
                $node->makeRoot();
                $node->save();
             }
             $model->appendTo($node);
-         }
-         else {
+         } else {
             $modelClass = $modelClass ?? (new $this->modelClass());
-            $node = $modelClass->find()->andWhere([$AllTables[$modelClass->tableName()]['primaryKey'][0]=>$appendTo])->one();
-            if($node === null) throw new \HttpRequestException("AppendTo key is unknown");
+            $node = $modelClass->find()->andWhere([$AllTables[$modelClass->tableName()]['primaryKey'][0] => $appendTo])->one();
+            if ($node === null) throw new \HttpRequestException("AppendTo key is unknown");
             $model->appendTo($node);
          }
       }
 
-      if( $insertAfter !== null ) {
+      if ($insertAfter !== null) {
          $insertAfter = intval($insertAfter);
          $modelClass = $modelClass ?? (new $this->modelClass());
          $node = $modelClass->find()->andWhere([$AllTables[$modelClass->tableName()]['primaryKey'][0] => $insertAfter])->one();
-         if($node === null) throw new \HttpRequestException("Insert After key is unknown");
+         if ($node === null) throw new \HttpRequestException("Insert After key is unknown");
          $model->insertAfter($node);
       }
 
-      if( $insertFirst !== null ) {
+      if ($insertFirst !== null) {
          $insertFirst = intval($insertFirst);
          $modelClass = $modelClass ?? (new $this->modelClass());
          $node = $modelClass->find()->andWhere([$AllTables[$modelClass->tableName()]['primaryKey'][0] => $insertFirst])->one();
-         if($node === null) throw new \HttpRequestException("Insert Root key is unknown");
+         if ($node === null) throw new \HttpRequestException("Insert Root key is unknown");
          $model->prependTo($node);
       }
 
@@ -115,25 +122,24 @@ class CreateAction extends Action
             $response->setStatusCode(201);
 
             $accepted_fields = $model->filterFieldsByRole('view', $model);
-            foreach ($model->attributes as $key=>$attr)
-               if(!in_array($key, $accepted_fields))
+            foreach ($model->attributes as $key => $attr)
+               if (!in_array($key, $accepted_fields))
                   unset($model->$key);
             return $model;
 
          }
-      }
-      catch (\Exception $exception) {
+      } catch (\Exception $exception) {
          $newException = $exception;
       }
 
       // Если есть ошибки после добавления в базу [когда валидаторы успешно пройдены] - удаляем временные файлы, если таковые имеются
       foreach ($model->behaviors() as $behavior)
-         if(is_string($behavior) && $behavior === UploadBehavior::class || isset($behavior['class']) && $behavior['class'] === UploadBehavior::class)
+         if (is_string($behavior) && $behavior === UploadBehavior::class || isset($behavior['class']) && $behavior['class'] === UploadBehavior::class)
             UploadBehavior::RemoveUnsavedFiles($model);
 
       // Известная и неизвестная ошибка
-      if($model->hasErrors()) return $model;
-      if($newException !== null) throw $newException;
+      if ($model->hasErrors()) return $model;
+      if ($newException !== null) throw $newException;
       throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
 
    }

@@ -58,11 +58,20 @@ class UpdateAction extends Action
 
       // Сравниваем полученные для изменения поля с разрешёнными
       $accepted_fields = $model->filterFieldsByRole('edit', $model, false, array_keys($data));
-      if(count($accepted_fields) !== count($data))
+
+      if(count($accepted_fields) === 0)
          throw new ForbiddenHttpException("Forbidden");
 
+      // Прописываем чистый массив данных [вместо unset], чтобы не проскочили рандомные вариации имён, которые не итерируются
+      // Если есть хоть 1 разрешённое поле для вставки - создаём запись, это поможет не учитывать кастомные поля, которые создаются в JS-моделях
+      $cleanData = [];
+      foreach ($data as $key => $value)
+         if (in_array($key, $accepted_fields)) $cleanData[$key] = $value;
+      $data = $cleanData;
+
+
       $model->scenario = $this->scenario;
-      $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+      $model->load($data, '');
 
       $modelClass = null;
       $AllTables = require(\Yii::getAlias("@common") . '/models/DB/models/Tables.php');
