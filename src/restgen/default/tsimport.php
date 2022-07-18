@@ -177,7 +177,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * @param fields поля, которые надо вернуть [если не указаны, вернёт все доступные]
      * @returns
      */
-    static async one(IDOrWhere: object | number | string, fields: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string> | null = null): Promise<<?= $controllerClass ?>|null> {
+    static async one(IDOrWhere: { <?= implode(", ", $AllTypesGETFields) ?> } | number | string, fields: {<?= implode(", ", $AllTypesGETFields) ?>} | Array<string> | null = null): Promise<<?= $controllerClass ?>|null> {
         return REST.one(this.tableName, IDOrWhere, fields, this.primaryKeys[0]);
     }
 
