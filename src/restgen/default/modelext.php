@@ -64,14 +64,16 @@ class <?=$className?> extends models\Table<?= $className ?>
         return [
             'MainUser' => [
                 'view' => '*',
+                'create' => '*',
                 'edit' => '*',
                 'delete' => '*',
                 'rowsFilter' => function($model){
-                   // $model->andWhere(['user'=>Yii::$app->user->id]);
+                   <?php if(!$USER_FILL): ?>//<?php endif;?> $model->andWhere(['user'=>Yii::$app->user->id]);
                 },
             ],
             'Guest' => [
                 'view' => '*',
+                'create' => [],
                 'edit' => [],
                 'delete' => null,
                 'rowsFilter' => function($model){
