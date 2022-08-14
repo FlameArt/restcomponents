@@ -74,7 +74,7 @@ class UpdateAction extends Action
       $model->load($data, '');
 
       $modelClass = null;
-      $AllTables = require(\Yii::getAlias("@common") . '/models/DB/models/Tables.php');
+      $AllTables = \common\models\DB\models\Tables::all;
 
       $appendTo = Yii::$app->request->get('appendTo');
       $insertAfter = Yii::$app->request->get('insertAfter');
