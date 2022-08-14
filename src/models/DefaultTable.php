@@ -1,7 +1,7 @@
 <?php
 
 
-namespace common\models\DB\models;
+namespace flameart\rest\models;
 
 use Yii;
 use yii\db\ActiveRecord;
