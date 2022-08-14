@@ -557,6 +557,9 @@ class ActiveRestController extends ActiveController
 
       });
 
+      // фильтр вывода общий
+      $DBModel->filterRowsByRole($DB);
+
       // Указываем фильтры
       if (isset($data['where'])) {
 

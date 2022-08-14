@@ -66,11 +66,16 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'view' => '*',
                 'edit' => '*',
                 'delete' => '*',
+                'rowsFilter' => function($model){
+                   // $model->andWhere(['user'=>Yii::$app->user->id]);
+                },
             ],
             'Guest' => [
                 'view' => '*',
                 'edit' => [],
                 'delete' => null,
+                'rowsFilter' => function($model){
+                },
             ],
         ];
     }
