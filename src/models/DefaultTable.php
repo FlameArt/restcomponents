@@ -6,8 +6,8 @@ namespace flameart\rest\models;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 use yii\web\ForbiddenHttpException;
+use common\models\DB\models\Tables;
 
 class DefaultTable extends ActiveRecord
 {
@@ -92,7 +92,7 @@ class DefaultTable extends ActiveRecord
 
       // Находим все связанные с запросом таблицы
       $AttrAll = array_unique(array_merge(array_keys($this->attributes) , $fields));
-      $AllTables = require('Tables.php');
+      $AllTables = Tables::all;
 
       $rules = $currentRules;
 

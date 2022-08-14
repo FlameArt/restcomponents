@@ -149,7 +149,7 @@ class ActiveRestController extends ActiveController
       $data = Json::decode(\Yii::$app->request->getRawBody(), true);
 
       // Данные таблиц
-      $AllTables = require(\Yii::getAlias("@common") . '/models/DB/models/Tables.php');
+      $AllTables = \common\models\DB\models\Tables::all;
 
       /**
        * Экземпляр модели
