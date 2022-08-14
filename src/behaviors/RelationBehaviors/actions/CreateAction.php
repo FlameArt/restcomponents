@@ -57,7 +57,7 @@ class CreateAction extends Action
       $data = Json::decode(\Yii::$app->request->getRawBody(), true);
 
       // Сравниваем полученные для изменения поля с разрешёнными
-      $accepted_fields = $model->filterFieldsByRole('edit', $model, false, array_keys($data));
+      $accepted_fields = $model->filterFieldsByRole('create', $model, false, array_keys($data));
 
       if(count($accepted_fields) === 0)
          throw new ForbiddenHttpException("Forbidden");
