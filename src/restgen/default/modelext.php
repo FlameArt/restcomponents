@@ -68,11 +68,16 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'edit' => '*',
                 'delete' => '*',
                 'rowsFilter' => function($model){
-                   <?php if(!$USER_FILL): ?>//<?php endif;?> $model->andWhere(['user'=>Yii::$app->user->id]);
+                   <?php if(!$USER_FILL && $className!=='UserSettings' && $className!=='UserNotifications' ): ?>//<?php endif;?> $model->andWhere(['user'=>Yii::$app->user->id]);
+                   <?php if($className ==='UserMessages'): ?>
+                       $model->orWhere(['user_from'=> Yii::$app->user->id]);
+                       $model->orWhere(['user_to'=> Yii::$app->user->id]);
+                       $model->orderBy(['id'=>SORT_ASC]);
+                   <?php endif;?>
                 },
             ],
             'Guest' => [
-                'view' => '*',
+                'view' => <?php if($className === 'UserSettings' || $className === 'UserNotifications') echo '[]'; else echo '*'?>,
                 'create' => [],
                 'edit' => [],
                 'delete' => null,
