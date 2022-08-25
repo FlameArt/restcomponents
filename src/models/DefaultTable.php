@@ -106,7 +106,7 @@ class DefaultTable extends ActiveRecord
             }
          }
 
-         if($mode === 'create') $mode = 'edit';
+         if($mode === 'create' && !isset($rules[$role][$mode])) $mode = 'edit';
 
          // Звёздочка позволяет проделывать все операции, соотв. unsetlist = []
          foreach ($AttrAll as $attrKey) {
