@@ -209,7 +209,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * @returns
      */
     public async create(): Promise<SavedObject<<?= $controllerClass ?>>> {
-        const result = await REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, this);
+        const result = await REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, this, null, null, null);
         if(result.data !== undefined)
             REST.fillObject(this, result.data)
         return result;
@@ -220,7 +220,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * @param params
      */
     public static create(params: {<?= implode(", ", $AllTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
-        return REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, params, tree?.appendTo, tree?.insertAfter, tree?.insertFirst);
+        return REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, params, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
     }
 
     /**
@@ -228,7 +228,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * @param params
      */
     public async edit(): Promise<SavedObject<<?= $controllerClass ?>>> {
-        const resp = await REST.edit<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, (this as any)[<?= $controllerClass ?>.primaryKeys[0]], this);
+        const resp = await REST.edit<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, (this as any)[<?= $controllerClass ?>.primaryKeys[0]], this, null, null, null);
         Object.assign(this, resp.data);
         return resp;
     }
@@ -238,7 +238,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * @param params
      */
     public static async edit(ID: number | string, values: {<?= implode(", ", $AllTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
-        return REST.edit<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, ID, values, tree?.appendTo, tree?.insertAfter, tree?.insertFirst);
+        return REST.edit<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, ID, values, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
     }
 
 
