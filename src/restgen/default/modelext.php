@@ -77,7 +77,7 @@ class <?=$className?> extends models\Table<?= $className ?>
                 },
             ],
             'Guest' => [
-                'view' => <?php if($className === 'UserSettings' || $className === 'UserNotifications') echo '[]'; else echo '*'?>,
+                'view' => '<?php if($className === 'UserSettings' || $className === 'UserNotifications') echo '[]'; else echo '*'?>',
                 'create' => [],
                 'edit' => [],
                 'delete' => null,
