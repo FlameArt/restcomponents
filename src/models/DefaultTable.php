@@ -100,7 +100,7 @@ class DefaultTable extends ActiveRecord
 
       if (isset($rules[$role])) {
 
-         if(($mode !== 'create') && $rules[$role][$mode] === 'self' && $mode === 'edit') {
+         if($mode === 'edit' && $rules[$role][$mode] === 'self') {
             if(!$model->hasAttribute($this->USER_ATTRIBUTE) || $model->getAttribute($this->USER_ATTRIBUTE) !== Yii::$app->user->id) {
                throw new ForbiddenHttpException("Forbidden");
             }

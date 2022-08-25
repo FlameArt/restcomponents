@@ -137,6 +137,7 @@ class ActiveRestController extends ActiveController
    {
 
       // TODO: get One запись надо убрать все лишние запросы на count итд
+      // SEC mini: если не указан тип юзера, то он получает для него все поля, но вывод будет пустым
       // SEC: запрос поля типа звёздочка
 
       ini_set('memory_limit', -1);
