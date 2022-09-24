@@ -129,8 +129,8 @@ class <?=$className?> extends models\Table<?= $className ?>
 			<?= !$CREATED_EXISTS && !$UPDATED_EXISTS ? '/*' : '' ?>
 			[
 				'class' => TimestampBehavior::class,
-				'createdAtAttribute' => 'created_at', # Дата создания, false - не учитывать
-				'updatedAtAttribute' => 'updated_at', # Дата изменения, false - не учитывать
+				'createdAtAttribute' => <?= $CREATED_EXISTS ? 'created_at' : 'false' ?>, # Дата создания, false - не учитывать
+				'updatedAtAttribute' => <?= $UPDATED_EXISTS ? 'updated_at' : 'false' ?>, # Дата изменения, false - не учитывать
 				'value' => new Expression('NOW()'),
 			],
 			<?= !$CREATED_EXISTS && !$UPDATED_EXISTS ? '*/' : '' ?>
