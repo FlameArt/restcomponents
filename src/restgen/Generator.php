@@ -207,7 +207,7 @@ class Generator extends \yii\gii\Generator
       $notGenerate = [
          '__sessions',
          '__usersauthservices',
-         'migration',
+         '__migrations',
          Yii::$app->components['authManager']['itemTable'],
          Yii::$app->components['authManager']['itemChildTable'],
          Yii::$app->components['authManager']['assignmentTable'],
