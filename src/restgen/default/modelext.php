@@ -15,12 +15,21 @@
 
 // Определяем: есть ли поле user, которое надо заполнять при создании записи
 $USER_FILL = false;
+$CREATED_EXISTS = false;
+$UPDATED_EXISTS = false;
 foreach ($tableSchema->columns as $column){
 	if(strtolower($column->name) == "user") {
 		$USER_FILL = true;
-		break;
+	}
+	if(strtolower($column->name) == "created_at") {
+		$CREATED_EXISTS = true;
+	}
+	if(strtolower($column->name) == "updated_at") {
+        $UPDATED_EXISTS = true;
 	}
 }
+
+
 
 
 echo "<?php\n";
@@ -89,7 +98,8 @@ class <?=$className?> extends models\Table<?= $className ?>
 
     /**
      * Валидаторы [в дополнение к базовым на основе БД]
-     * Файлы: [['avatar'], 'file', 'extensions' => ['png', 'gif', 'jpg', ], 'maxSize' => 1024*1024, 'maxFiles' => 4]
+     * Файлы:
+     * [['avatar'], 'file', 'extensions' => ['png', 'gif', 'jpg', ], 'maxSize' => 1024*1024, 'maxFiles' => 4]
     */
     public function rulesExt() {
        return [];
@@ -115,14 +125,15 @@ class <?=$className?> extends models\Table<?= $className ?>
 <?php endif; ?>
 
 			// Автоматический учёт времени: указываются поля дат создания и изменения в таблице
-			/*
+			<?= !$CREATED_EXISTS && !$UPDATED_EXISTS ? '/*' : '' ?>
 			[
 				'class' => TimestampBehavior::class,
 				'createdAtAttribute' => 'created_at', # Дата создания, false - не учитывать
-				'updatedAtAttribute' => 'changed_at', # Дата изменения, false - не учитывать
+				'updatedAtAttribute' => 'updated_at', # Дата изменения, false - не учитывать
 				'value' => new Expression('NOW()'),
 			],
-			*/
+			<?= !$CREATED_EXISTS && !$UPDATED_EXISTS ? '*/' : '' ?>
+
 
 
 			// Nested Sortable: быстрая сортировка дерева через Materialize Path
