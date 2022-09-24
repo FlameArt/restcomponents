@@ -13,6 +13,23 @@
 /* @var $rules string[] list of validation rules */
 /* @var $relations array list of relations (name => relation declaration) */
 
+// Определяем: есть ли поле user, которое надо заполнять при создании записи
+$USER_FILL = false;
+$CREATED_EXISTS = false;
+$UPDATED_EXISTS = false;
+foreach ($tableSchema->columns as $column){
+   if(strtolower($column->name) == "user") {
+      $USER_FILL = true;
+   }
+   if(strtolower($column->name) == "created_at") {
+      $CREATED_EXISTS = true;
+   }
+   if(strtolower($column->name) == "updated_at") {
+      $UPDATED_EXISTS = true;
+   }
+}
+
+
 $className = "Table".$className;
 
 echo "<?php\n";
@@ -94,14 +111,19 @@ class <?= $className ?> extends DefaultTable
         return <?= str_replace(["array", "(", ")", "\\\\","\n"], ["","[","]", "\\","\n        "], var_export($relations_list, true)) ?>;
     }
 
+    /**
+     * Сгенерированные правила, которые можно переопределить
+     */
+    public $default_rules = [<?= "\n            " . implode(",\n            ", $rules) . ",\n        " ?>];
 
     /**
      * @inheritdoc
      */
     public function rules()
     {
-        $arr = array_merge($this->rulesExt(), [<?= "\n            " . implode(",\n            ", $rules) . ",\n        " ?>]);
+        $arr = array_merge($this->rulesExt(), $default_rules);
 
+        // TODO: надо иметь какие-то статичные правила, чтобы их можно было менять непосредственно, но при этом чтобы при добавлении нового поля оно подхватывалось с предгенеренными правилами для себя
         // Отключаем проверку для загруженных файлов на корректность строки
         $fields = [];
         foreach ($this->behaviors() as $behavior)

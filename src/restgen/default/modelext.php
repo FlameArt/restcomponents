@@ -102,6 +102,7 @@ class <?=$className?> extends models\Table<?= $className ?>
      * [['avatar'], 'file', 'extensions' => ['png', 'gif', 'jpg', ], 'maxSize' => 1024*1024, 'maxFiles' => 4]
     */
     public function rulesExt() {
+<?= $CREATED_EXISTS || $UPDATED_EXISTS || $USER_FILL ? "       $this->RemoveFieldsFromRule($this->default_rules, 'required', [" . ($USER_FILL ? "'user'," : ''). ($CREATED_EXISTS ? "'created_at'," : ''). ($UPDATED_EXISTS ? "'updated_at'," : '')."] );" : ''?>
        return [];
     }
 

@@ -174,6 +174,20 @@ class DefaultTable extends ActiveRecord
    }
 
    /**
+    * @param array $rules
+    * @param string $ruleType
+    * @param array $rule_fields
+    */
+   public function RemoveFieldsFromRule(&$rules, $ruleType, $rule_fields) {
+
+      foreach ($rules as &$rule)
+         if($rule[1]===$ruleType)
+            foreach ($rule[0] as $key=>$field)
+               if(in_array($field, $rule_fields)) unset($rule[0][$key]);
+
+   }
+
+   /**
     * Список всех полей ДБ с их оригинальными типами
     * @return array
     */
