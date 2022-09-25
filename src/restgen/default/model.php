@@ -121,7 +121,7 @@ class <?= $className ?> extends DefaultTable
      */
     public function rules()
     {
-        $arr = array_merge($this->rulesExt(), $default_rules);
+        $arr = array_merge($this->rulesExt(), $this->default_rules);
 
         // TODO: надо иметь какие-то статичные правила, чтобы их можно было менять непосредственно, но при этом чтобы при добавлении нового поля оно подхватывалось с предгенеренными правилами для себя
         // Отключаем проверку для загруженных файлов на корректность строки
