@@ -116,6 +116,15 @@ class <?=$className?> extends models\Table<?= $className ?>
 	{
 		return [
 
+            // Поля для загрузки файлов
+            [
+                'class' => UploadBehavior::class,
+                'fieldsFolders' => [
+                    'avatar' => '/usersdata/avatar/',
+                    'files' => '/usersdata/uploads/'
+                ]
+            ],
+
 <?php if($USER_FILL): ?>
 			// Автоматическое заполнение поля user при создании и обновлении записи: указать поле
 			[
@@ -148,16 +157,8 @@ class <?=$className?> extends models\Table<?= $className ?>
 				'sortable' => [
 					'sortAttribute' => 'm_sort'
                 ]
-            ]
+            ],
 			*/
-
-            [
-                'class' => UploadBehavior::class,
-                'fieldsFolders' => [
-                    'avatar' => '/usersdata/avatar/',
-                    'files' => '/usersdata/uploads/'
-                ]
-            ]
 
 
 		];
