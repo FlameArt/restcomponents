@@ -8,6 +8,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use common\models\DB\models\Tables;
+use flameart\rest\behaviors\UploadBehavior;
 
 class DefaultTable extends ActiveRecord
 {
@@ -187,6 +188,8 @@ class DefaultTable extends ActiveRecord
 
    }
 
+
+
    /**
     * Список всех полей ДБ с их оригинальными типами
     * @return array
@@ -227,6 +230,42 @@ class DefaultTable extends ActiveRecord
    public function attributes()
    {
       return array_keys($this->tableFields());
+   }
+
+   /**
+    * Дополнительные валидаторы, которые будут совмещены с оригинальными rules
+    * @return array
+    */
+   public function rulesExt() {
+      return [];
+   }
+
+   /**
+    * @inheritdoc
+    */
+   public function rules()
+   {
+      $arr = array_merge($this->rulesExt(), $this->default_rules);
+
+      // TODO: надо иметь какие-то статичные правила, чтобы их можно было менять непосредственно, но при этом чтобы при добавлении нового поля оно подхватывалось с предгенеренными правилами для себя
+      // Отключаем проверку для загруженных файлов на корректность строки
+      $fields = [];
+      foreach ($this->behaviors() as $behavior)
+         if(isset($behavior['class']) && $behavior['class'] === UploadBehavior::class || $behavior === UploadBehavior::class) $fields = $behavior['fieldsFolders'];
+
+      $fields = array_keys($fields);
+      foreach ($arr as &$item) {
+         if(is_array($item[0])) {
+            foreach ($item[0] as $key => $attr) {
+               if(in_array($attr, $fields) && $item[1] === 'string') {
+                  unset($item[0][$key]);
+               }
+            }
+         }
+      }
+
+      return $arr;
+
    }
 
    /**** ОПЕРАЦИИ С ДЕРЕВЬЯМИ ****/
