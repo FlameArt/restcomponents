@@ -89,7 +89,7 @@ class SiteController extends Controller
       Yii::$app->response->format = Response::FORMAT_HTML;
 
       // Устанавливаем каждому анону хеш, по которому его можно идентифицировать в статистике
-      if(!Yii::$app->response->cookies->has('user_hash'))
+      if(!Yii::$app->request->cookies->has('user_hash'))
          Yii::$app->response->cookies->add(new yii\web\Cookie([
             'name'=> "user_hash",
             'value' => md5(microtime(true).$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']),
@@ -102,7 +102,7 @@ class SiteController extends Controller
 
       // Устанавливаем впервые зашедшим в куки аффилейтскую ссылку, либо пустую аффилейтку, если зашёл без неё, чтобы нельзя было переназначить
       $affiliate = (new Affiliate())->GetAffiliateDataFromURL();
-      if(!Yii::$app->response->cookies->has('aff_id') && isset($affiliate['affID']))
+      if(!Yii::$app->request->cookies->has('aff_id') && isset($affiliate['affID']))
          Yii::$app->response->cookies->add(new yii\web\Cookie([
             'name'=> "aff_id",
             'value' => $affiliate['affID'],
@@ -113,7 +113,7 @@ class SiteController extends Controller
             'sameSite' => 'Strict',
          ]));
 
-      if(!Yii::$app->response->cookies->has('aff_link') && isset($affiliate['affLink']))
+      if(!Yii::$app->request->cookies->has('aff_link') && isset($affiliate['affLink']))
          Yii::$app->response->cookies->add(new yii\web\Cookie([
             'name'=> "aff_link",
             'value' => $affiliate['affLink'],
