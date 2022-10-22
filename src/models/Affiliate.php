@@ -71,8 +71,8 @@ class Affiliate
    public static function GetAffiliateDataFromCookies()
    {
       return [
-         'affID'=> \Yii::$app->response->cookies->getValue('aff_id') ?? 0,
-         'affLink' => \Yii::$app->response->cookies->getValue('aff_link') ?? 0,
+         'affID'=> \Yii::$app->request->cookies->getValue('aff_id') ?? 0,
+         'affLink' => \Yii::$app->request->cookies->getValue('aff_link') ?? 0,
       ];
    }
 
