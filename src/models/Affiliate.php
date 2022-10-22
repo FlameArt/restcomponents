@@ -39,8 +39,8 @@ class Affiliate
 
       $url = $url ?? $_SERVER['REQUEST_URI'];
 
-      $affid = str_replace("\{AFFID\}", "([0-9]*?)", preg_quote($this->link_template_affid, '/'));
-      $affidlinkid = str_replace(["\{AFFID\}", "\{AFFLINK\}"], "([0-9]*?)", preg_quote($this->link_template_affid_afflink, '/'));
+      $affid = str_replace("\{AFFID\}", "([0-9]*)", preg_quote($this->link_template_affid, '/'));
+      $affidlinkid = str_replace(["\{AFFID\}", "\{AFFLINK\}"], "([0-9]*)", preg_quote($this->link_template_affid_afflink, '/'));
 
       $result = null;
 
