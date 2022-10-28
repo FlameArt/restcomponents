@@ -219,8 +219,11 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * Создать объект через прямой вызов функции
      * @param params
      */
-    public static create(params: {<?= implode(", ", $AllTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
-        return REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, params, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
+    public static async create(params: {<?= implode(", ", $AllTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
+        const result = REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, params, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
+        if (result.data !== undefined)
+            result.data = REST.fillObject(new <?= $controllerClass ?>(), result.data);
+        return result;
     }
 
     /**
