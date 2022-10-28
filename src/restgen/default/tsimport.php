@@ -127,7 +127,7 @@ foreach ($tableSchema->columns as $column) {
    }
 
    $AllTypes[] = $column->name . ($column->isPrimaryKey || $column->defaultValue !== null || $column->allowNull ? '?' : '') . ": " . $type;
-   $AllTypesGETFields[] = $column->name . '?: string ' .($cleanRelType === '' ? "" : " | " . $cleanRelType);
+   $AllTypesGETFields[] = $column->name . '?: '. $type .' ' .($cleanRelType === '' ? "" : " | " . $cleanRelType);
    $AllTypesAllFields[] = $column->name . ': ' . ($cleanRelType === '' ? "''" : $cleanRelType . ".Fields");
     $DefaultClassesStr[] = '    public '.$column->name.': string ' .($cleanRelType === '' ? "" : " | " . $cleanRelType). ' = "";';
 
@@ -219,8 +219,8 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * Создать объект через прямой вызов функции
      * @param params
      */
-    public static async create(params: {<?= implode(", ", $AllTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
-        const result = REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, params, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
+    public static async create(params: {<?= implode(", ", $AllTypesGETFields) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
+        const result = await REST.create<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, params, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
         if (result.data !== undefined)
             result.data = REST.fillObject(new <?= $controllerClass ?>(), result.data);
         return result;
