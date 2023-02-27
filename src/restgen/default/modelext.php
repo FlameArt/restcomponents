@@ -98,7 +98,7 @@ class <?=$className?> extends models\Table<?= $className ?>
 
     /**
      * Валидаторы [в дополнение к базовым на основе БД]
-     * Файлы:
+     * Файлы [поле в базе должно быть вида JSON]:
      * [['avatar'], 'file', 'extensions' => ['png', 'gif', 'jpg', ], 'maxSize' => 1024*1024, 'maxFiles' => 4]
     */
     public function rulesExt() {

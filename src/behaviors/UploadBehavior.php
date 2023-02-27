@@ -4,6 +4,7 @@
 namespace flameart\rest\behaviors;
 
 
+use flameart\rest\models\UploadedFileExtended;
 use yii\db\ActiveRecord;
 use yii\db\BaseActiveRecord;
 use yii\web\UploadedFile;
@@ -44,7 +45,7 @@ class UploadBehavior extends \yii\base\Behavior
                         $newfile = tempnam(sys_get_temp_dir(), "_tmp");
                         $bytes = file_get_contents(str_replace(' ', '+', $thisFile['data']));
                         file_put_contents($newfile, $bytes);
-                        $attrValues[] = new UploadedFile(['name' => $thisFile['name'], 'tempName' => $newfile, 'type' => \yii\helpers\FileHelper::getMimeType($newfile), 'size' => filesize($newfile)]);
+                        $attrValues[] = new UploadedFileExtended(['id'=> $thisFile['id'], 'name' => $thisFile['name'], 'tempName' => $newfile, 'type' => \yii\helpers\FileHelper::getMimeType($newfile), 'size' => filesize($newfile)]);
                      }
                      $this->owner->setAttribute($attr, $attrValues);
                   }
@@ -73,7 +74,10 @@ class UploadBehavior extends \yii\base\Behavior
                            $newFilename = trim($this->fieldsFolders[$attr], "/\\") . "/" . preg_replace("/([^A-Za-z0-9_])/", "_", \Yii::$app->security->generateRandomString(32)) . "." . $thisFile->extension;
                            if (!file_exists(\Yii::getAlias('@app') . "/../" . $newFilename)) break;
                         }
-                        $attrValues[] = $newFilename;
+                        $attrValues[] = [
+                           'file'=> $newFilename,
+                           'id'=> $thisFile->id,
+                        ];
 
                         if (count($this->owner->errors) > 0)
                            unlink($thisFile->tempName);
@@ -81,7 +85,7 @@ class UploadBehavior extends \yii\base\Behavior
                            rename($thisFile->tempName, \Yii::getAlias('@app') . "/../" . $newFilename);
 
                      }
-                     $this->owner->setAttribute($attr, implode(";", $attrValues));
+                     $this->owner->setAttribute($attr, $attrValues);
                   }
                }
             }
