@@ -31,6 +31,7 @@ $tableSchema = $params['tableSchema'];
 //$actionParamComments = $generator->generateActionParamComments();
 
 $AllTypes = [];
+$AllNulledTypes = [];
 $AllTypesGETFields = [];
 $sortFields = [];
 
@@ -127,6 +128,7 @@ foreach ($tableSchema->columns as $column) {
    }
 
    $AllTypes[] = $column->name . ($column->isPrimaryKey || $column->defaultValue !== null || $column->allowNull ? '?' : '') . ": " . $type;
+   $AllNulledTypes[] = $column->name . '?: ' . $type;
    $AllTypesGETFields[] = $column->name . '?: '. $type .' ' .($cleanRelType === '' ? "" : " | " . $cleanRelType);
    $AllTypesAllFields[] = $column->name . ': ' . ($cleanRelType === '' ? "''" : $cleanRelType . ".Fields");
     $DefaultClassesStr[] = '    public '.$column->name.': string ' .($cleanRelType === '' ? "" : " | " . $cleanRelType). ' = "";';
@@ -240,7 +242,7 @@ export default class Generated<?= $controllerClass ?> extends RESTTable {
      * Изменить значения через прямой вызов функции
      * @param params
      */
-    public static async edit(ID: number | string, values: {<?= implode(", ", $AllTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
+    public static async edit(ID: number | string, values: {<?= implode(", ", $AllNulledTypes) ?>}, tree?: { appendTo?: number | string | null, insertAfter?: number | string | null, insertFirst?: number | string | null }): Promise<SavedObject<<?= $controllerClass ?>>> {
         return REST.edit<<?= $controllerClass ?>>(<?= $controllerClass ?>.tableName, ID, values, tree?.appendTo ?? null, tree?.insertAfter ?? null, tree?.insertFirst ?? null);
     }
 
