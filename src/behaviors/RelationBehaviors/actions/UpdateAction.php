@@ -71,7 +71,7 @@ class UpdateAction extends Action
 
 
       $model->scenario = $this->scenario;
-      $model->load($data, '');
+      $model->load(['form'=>$data], 'form');
 
       $modelClass = null;
       $AllTables = \common\models\DB\models\Tables::all;

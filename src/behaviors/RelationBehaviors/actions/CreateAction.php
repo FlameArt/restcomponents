@@ -69,7 +69,7 @@ class CreateAction extends Action
          if (in_array($key, $accepted_fields)) $cleanData[$key] = $value;
       $data = $cleanData;
 
-      $model->load($data, '');
+      $model->load(['form'=>$data], 'form');
 
       $modelClass = null;
       $AllTables = \common\models\DB\models\Tables::all;
