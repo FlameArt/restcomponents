@@ -47,4 +47,16 @@ export default class RESTTable {
     }
   }
 
+  /**
+   * Прогрузить данные
+   * @param loadData
+   */
+  public load(loadData: any) {
+
+    for (const key in this) {
+      if (loadData[key] !== undefined) this[key] = loadData[key];
+    }
+
+  }
+
 }
