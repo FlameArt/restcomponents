@@ -81,8 +81,10 @@ class UploadBehavior extends \yii\base\Behavior
 
                         if (count($this->owner->errors) > 0)
                            unlink($thisFile->tempName);
-                        else
+                        else {
                            rename($thisFile->tempName, \Yii::getAlias('@app') . "/../" . $newFilename);
+                           chmod(\Yii::getAlias('@app') . "/../" . $newFilename, 0640);
+                        }
 
                      }
                      $this->owner->setAttribute($attr, $attrValues);
