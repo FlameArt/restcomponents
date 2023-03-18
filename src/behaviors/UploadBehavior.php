@@ -42,10 +42,26 @@ class UploadBehavior extends \yii\base\Behavior
                   $attrValues = [];
                   if ($thisAttr !== null && is_array($thisAttr)) {
                      foreach ($thisAttr as $thisFile) {
+
+                        // Существующие файлы
+                        if (isset($thisFile['file'])) {
+
+                           // Короткая валидация с удалением повреждённых записей
+                           // TODO: можно валидацию сделать чётче, чтобы с других источников файлы не подставлялись
+                           if (preg_match("/^([A-Za-z0-9_.\/]*)$/", $thisFile['file']) === 0) continue;
+                           if (preg_match("/^([A-Za-z0-9_]*)$/", $thisFile['id']) === 0) continue;
+                           if (count($thisFile) !== 2) continue;
+
+                           $attrValues[] = $thisFile;
+
+                           continue;
+                        }
+
+                        // Новые файлы
                         $newfile = tempnam(sys_get_temp_dir(), "_tmp");
                         $bytes = file_get_contents(str_replace(' ', '+', $thisFile['data']));
                         file_put_contents($newfile, $bytes);
-                        $attrValues[] = new UploadedFileExtended(['id'=> $thisFile['id'], 'name' => $thisFile['name'], 'tempName' => $newfile, 'type' => \yii\helpers\FileHelper::getMimeType($newfile), 'size' => filesize($newfile)]);
+                        $attrValues[] = new UploadedFileExtended(['id' => $thisFile['id'], 'name' => $thisFile['name'], 'tempName' => $newfile, 'type' => \yii\helpers\FileHelper::getMimeType($newfile), 'size' => filesize($newfile)]);
                      }
                      $this->owner->setAttribute($attr, $attrValues);
                   }
@@ -69,23 +85,29 @@ class UploadBehavior extends \yii\base\Behavior
                   $attrValues = [];
                   if ($thisAttr !== null && is_array($thisAttr)) {
                      foreach ($thisAttr as $thisFile) {
-                        $newFilename = '';
-                        for ($i = 0; $i < 10; $i++) {
-                           $newFilename = trim($this->fieldsFolders[$attr], "/\\") . "/" . preg_replace("/([^A-Za-z0-9_])/", "_", \Yii::$app->security->generateRandomString(32)) . "." . $thisFile->extension;
-                           if (!file_exists(\Yii::getAlias('@app') . "/../" . $newFilename)) break;
-                        }
-                        $attrValues[] = [
-                           'file'=> $newFilename,
-                           'id'=> $thisFile->id,
-                        ];
+                        // новые файлы, прошедшие валидацию
+                        if (!(is_array($thisFile) && isset($thisFile['file']))) {
+                           $newFilename = '';
+                           for ($i = 0; $i < 10; $i++) {
+                              $newFilename = trim($this->fieldsFolders[$attr], "/\\") . "/" . preg_replace("/([^A-Za-z0-9_])/", "_", \Yii::$app->security->generateRandomString(32)) . "." . $thisFile->extension;
+                              if (!file_exists(\Yii::getAlias('@app') . "/../" . $newFilename)) break;
+                           }
+                           $attrValues[] = [
+                              'file' => $newFilename,
+                              'id' => $thisFile->id,
+                           ];
 
-                        if (count($this->owner->errors) > 0)
-                           unlink($thisFile->tempName);
+                           if (count($this->owner->errors) > 0)
+                              unlink($thisFile->tempName);
+                           else {
+                              rename($thisFile->tempName, \Yii::getAlias('@app') . "/../" . $newFilename);
+                              chmod(\Yii::getAlias('@app') . "/../" . $newFilename, 0640);
+                           }
+                        }
                         else {
-                           rename($thisFile->tempName, \Yii::getAlias('@app') . "/../" . $newFilename);
-                           chmod(\Yii::getAlias('@app') . "/../" . $newFilename, 0640);
+                           // Старые файлы
+                           $attrValues[] = $thisFile;
                         }
-
                      }
                      $this->owner->setAttribute($attr, $attrValues);
                   }
