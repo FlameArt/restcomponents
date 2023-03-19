@@ -119,8 +119,12 @@ class DefaultTable extends ActiveRecord
                case '*':
                case true:
                   return [];
-               case false:
-               case null:
+               case 'self':
+                  // Ошибка, если юзер не автор
+                  if(!$model->hasAttribute($this->USER_ATTRIBUTE) || $model->getAttribute($this->USER_ATTRIBUTE) !== Yii::$app->user->id)
+                     throw new ForbiddenHttpException("Forbidden");
+                  // Во всех остальных случаях пропускаем
+                  return [];
                default:
                   throw new ForbiddenHttpException("Forbidden");
             }
