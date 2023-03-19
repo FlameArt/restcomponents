@@ -38,9 +38,14 @@ class DeleteAction extends Action
       else
          $model = new $this->modelClass;
 
+      // Проверка доступа первичная
       if ($this->checkAccess) {
          call_user_func($this->checkAccess, $this->id, $model);
       }
+
+      // Проверка доступа базовая
+      // Тут будет throw forbidden если условиям не подходит
+      $model->filterFieldsByRole('delete', $model);
 
       if (isset($model->behaviors['MaterializedPath'])) {
          if (Yii::$app->request->get("withoutChildrens") === null) {

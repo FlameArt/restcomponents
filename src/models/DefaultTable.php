@@ -35,11 +35,13 @@ class DefaultTable extends ActiveRecord
       return [
          'MainUser' => [
             'view' => '*',
+            'create' => '*',
             'edit' => '*',
             'delete' => '*'
          ],
          'Guest' => [
             'view' => '*',
+            'create' => null,
             'edit' => [],
             'delete' => null
          ],
@@ -108,6 +110,21 @@ class DefaultTable extends ActiveRecord
          }
 
          if($mode === 'create' && !isset($rules[$role][$mode])) $mode = 'edit';
+
+         // Обрабатываем нуль для любого действия
+         if($rules[$role][$mode] === null) throw new ForbiddenHttpException("Forbidden");
+
+         if($mode === 'delete') {
+            switch ($rules[$role][$mode]) {
+               case '*':
+               case true:
+                  return [];
+               case false:
+               case null:
+               default:
+                  throw new ForbiddenHttpException("Forbidden");
+            }
+         }
 
          // Звёздочка позволяет проделывать все операции, соотв. unsetlist = []
          foreach ($AttrAll as $attrKey) {
