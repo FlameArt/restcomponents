@@ -114,6 +114,7 @@ class DefaultTable extends ActiveRecord
          // Обрабатываем нуль для любого действия
          if($rules[$role][$mode] === null) throw new ForbiddenHttpException("Forbidden");
 
+         // Удаление проводим по отдельной программе
          if($mode === 'delete') {
             switch ($rules[$role][$mode]) {
                case '*':
