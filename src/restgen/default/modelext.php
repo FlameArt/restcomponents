@@ -164,4 +164,26 @@ class <?=$className?> extends models\Table<?= $className ?>
 		];
 	}
 
+	public function afterSave($insert, $changedAttributes)
+    {
+      parent::afterSave($insert, $changedAttributes);
+
+      /**
+       * Добавляем подписку на элемент этой таблицы
+
+      if($insert) {
+         $newsub = new Subscribtions();
+         $newsub->item = $this->id;
+         $newsub->itemTable = self::tableName();
+         $newsub->price = 0;
+         $newsub->periodDays = 0;
+         $newsub->periodMonths = 1;
+         $newsub->trialDays = 3;
+         $newsub->isForeverItem = 0;
+         $newsub->save();
+      }
+      */
+   }
+
+
 }
