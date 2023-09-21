@@ -33,17 +33,29 @@ class DefaultTable extends ActiveRecord
    public function ACCESS_RULES()
    {
       return [
+         'Admin' => [
+            'view' => '*',
+            'create' => '*',
+            'edit' => '*',
+            'delete' => '*',
+            'rowsFilter' => function($model){
+            },
+         ],
          'MainUser' => [
             'view' => '*',
             'create' => '*',
             'edit' => '*',
-            'delete' => '*'
+            'delete' => '*',
+            'rowsFilter' => function($model){
+            },
          ],
          'Guest' => [
             'view' => '*',
             'create' => null,
             'edit' => [],
-            'delete' => null
+            'delete' => null,
+            'rowsFilter' => function($model){
+            },
          ],
       ];
    }

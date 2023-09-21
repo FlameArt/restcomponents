@@ -77,7 +77,14 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'edit' => '*',
                 'delete' => '*',
                 'rowsFilter' => function($model){
-                   <?php if(!$USER_FILL && $className!=='UserSettings' && $className!=='UserNotifications' ): ?>//<?php endif;?> $model->andWhere(['user'=>Yii::$app->user->id]);
+                   <?php if(!$USER_FILL &&
+                      $className!=='UserSettings' &&
+                      $className!=='UserNotifications' &&
+                      $className!=='UserMessages' &&
+                      $className!=='UserPushTokens' &&
+                      $className!=='UserOrders' &&
+                      $className!=='UserSubscribtions'
+                   ): ?>//<?php endif;?> $model->andWhere(['user'=>Yii::$app->user->id]);
                    <?php if($className ==='UserMessages'): ?>
                        $model->orWhere(['user_from'=> Yii::$app->user->id]);
                        $model->orWhere(['user_to'=> Yii::$app->user->id]);
@@ -90,6 +97,14 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'create' => [],
                 'edit' => [],
                 'delete' => null,
+                'rowsFilter' => function($model){
+                },
+            ],
+            'Admin' => [
+                'view' => '*',
+                'create' => '*',
+                'edit' => '*',
+                'delete' => '*',
                 'rowsFilter' => function($model){
                 },
             ],
