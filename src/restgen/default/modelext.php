@@ -140,7 +140,7 @@ class <?=$className?> extends models\Table<?= $className ?>
                 ]
             ],
 
-<?php if($USER_FILL): ?>
+<?php if($USER_FILL && $className!=='UserPushTokens'): ?>
 			// Автоматическое заполнение поля user при создании и обновлении записи: указать поле
 			[
 				'class' => BlameableBehavior::class,
