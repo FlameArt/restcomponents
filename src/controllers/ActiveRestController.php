@@ -164,7 +164,8 @@ class ActiveRestController extends ActiveController
        * @var $DB Query
        */
       $current_table = $DBModel::tableName();
-      $DB = (new Query())->from($current_table);
+      $DB = (new RestQuery())->from($current_table);
+      $DB->modelClass = $this->modelClass;
 
       // Если указано получение конкретного дерева по ID
       $approvedItems = [];
@@ -620,9 +621,9 @@ class ActiveRestController extends ActiveController
       // Добавляем в модель специфические обработчики, если нужно
       $DB = $this->ExtendQuery($DB, $data);
 
-      // Экспорт xlsx
-      if (isset($data['format'])) {
-         if ($data['format'] === 'xlsx') {
+      if (isset($data['export'])) {
+         // Экспорт xlsx
+         if ($data['export']['format'] === 'xlsx') {
             $DB->limit(null);
             $DB->offset(null);
             $export_params = [
@@ -633,14 +634,15 @@ class ActiveRestController extends ActiveController
                      'class' => 'codemix\excelexport\ActiveExcelSheet',
                      'query' => $DB,
                      'attributes' => $data['fields'],
-                     'titles' => $data['titles']
+                     'titles' => $data['export']['titles']
                   ]
                ]
             ];
-            $export_params = $this->CustomExporter($export_params, 'info', $data['format'], $DB);
+            $export_params = $this->CustomExporter($export_params, 'info', $data['export'], $DB);
+
             $file = \Yii::createObject($export_params);
             \Yii::$app->response->format = \yii\web\Response::FORMAT_HTML;
-            $file->send('test.xlsx');
+            $file->send($data['export']['filename']);
             exit;
          }
       }
