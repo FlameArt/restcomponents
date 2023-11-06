@@ -634,7 +634,7 @@ class ActiveRestController extends ActiveController
 
       // Параметры только для экспорта
       if(isset($data['export'])) {
-         $pagination=[];
+         $pagination['pageSize'] = 1000;
          $DB = $this->exportQueryConfigure($DB);
       }
 
