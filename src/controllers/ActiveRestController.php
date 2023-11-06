@@ -554,6 +554,17 @@ class ActiveRestController extends ActiveController
 
             // После организации всех join, если режим дерева, то вставляем детей каждого элемента
 
+            // Вывод
+
+            // ЭКСПОРТ
+            if (isset($data['export'])) {
+               if ($data['export']['format'] === 'xlsx') {
+                  $this->ExportAsXLSX($datagraph, $data);
+                  return;
+               }
+            }
+
+            // Pure JSON
             $res->sender->data = $datagraph;
          }
 
@@ -621,30 +632,10 @@ class ActiveRestController extends ActiveController
       // Добавляем в модель специфические обработчики, если нужно
       $DB = $this->ExtendQuery($DB, $data);
 
-      if (isset($data['export'])) {
-         // Экспорт xlsx
-         if ($data['export']['format'] === 'xlsx') {
-            $DB->limit(null);
-            $DB->offset(null);
-            $export_params = [
-               'class' => 'codemix\excelexport\ExcelFile',
-               'fileOptions' => ['directory' => \Yii::getAlias('@runtime')],
-               'sheets' => [
-                  'info' => [
-                     'class' => 'codemix\excelexport\ActiveExcelSheet',
-                     'query' => $DB,
-                     'attributes' => $data['fields'],
-                     'titles' => $data['export']['titles']
-                  ]
-               ]
-            ];
-            $export_params = $this->CustomExporter($export_params, 'info', $data['export'], $DB);
-
-            $file = \Yii::createObject($export_params);
-            \Yii::$app->response->format = \yii\web\Response::FORMAT_HTML;
-            $file->send($data['export']['filename']);
-            exit;
-         }
+      // Параметры только для экспорта
+      if(isset($data['export'])) {
+         $pagination=[];
+         $DB = $this->exportQueryConfigure($DB);
       }
 
       // Отдаём ActiveDataProvider, который поддерживает авто-пагинацию и сортировку
@@ -654,6 +645,27 @@ class ActiveRestController extends ActiveController
          'pagination' => $pagination,
          'isCacheCount' => in_array(\Yii::$app->controller->id, $this->cachePaginationForPages)
       ]);
+   }
+
+   public function ExportAsXLSX($datagraph, $data) {
+      $export_params = [
+         'class' => 'codemix\excelexport\ExcelFile',
+         'fileOptions' => ['directory' => \Yii::getAlias('@runtime')],
+         'sheets' => [
+            // todo: custom sheet name
+            'info' => [
+               'class' => 'codemix\excelexport\ExcelSheet',
+               'data'=> $datagraph,
+               'titles' => $data['export']['titles']
+            ]
+         ]
+      ];
+      $export_params = $this->exportResultsConfigure($export_params, 'info', $data['export'], $datagraph);
+
+      $file = \Yii::createObject($export_params);
+      \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+      $file->send($data['export']['filename']);
+      exit;
    }
 
    /**
@@ -699,15 +711,23 @@ class ActiveRestController extends ActiveController
    }
 
    /**
-    * Кастомизация экспорта
+    * Настройка запроса перед экспортом
+    * @param $model
+    * @return mixed
+    */
+   public function exportQueryConfigure(&$model) {
+      return $model;
+   }
+
+   /**
+    * Настройка ответа: данные, формат файла и его стиль
     * @param $params
     * @param $default_sheetname
     * @param $format
     * @param $model
     * @return mixed
     */
-   public function CustomExporter($params, $default_sheetname, $format, $model)
-   {
+   public function exportResultsConfigure(&$params, $default_sheetname, $format, $model) {
       return $params;
    }
 
