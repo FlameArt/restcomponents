@@ -17,7 +17,6 @@ use yii\web\NotFoundHttpException;
 use yii\base\ErrorException;
 
 
-
 /**
  * REST API Controller Objects */
 class ActiveRestController extends ActiveController
@@ -69,19 +68,19 @@ class ActiveRestController extends ActiveController
       $this->AUTH_ENABLED = \Yii::$app->params['AUTH'];
       $actions = parent::actions();
       $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
-      $actions['create']= [
+      $actions['create'] = [
          'class' => 'flameart\rest\behaviors\RelationBehaviors\actions\CreateAction',
          'modelClass' => $this->modelClass,
          'checkAccess' => [$this, 'checkAccess'],
          'scenario' => $this->createScenario,
       ];
-      $actions['update']= [
+      $actions['update'] = [
          'class' => 'flameart\rest\behaviors\RelationBehaviors\actions\UpdateAction',
          'modelClass' => $this->modelClass,
          'checkAccess' => [$this, 'checkAccess'],
          'scenario' => $this->updateScenario,
       ];
-      $actions['delete']= [
+      $actions['delete'] = [
          'class' => 'flameart\rest\behaviors\RelationBehaviors\actions\DeleteAction',
          'modelClass' => $this->modelClass,
          'checkAccess' => [$this, 'checkAccess'],
@@ -89,18 +88,6 @@ class ActiveRestController extends ActiveController
       return $actions;
    }
 
-   /**
-    * Добавляем возможность запостить json в index action
-    * @return array
-    */
-   protected function verbs()
-   {
-      $verbs = parent::verbs();
-      $verbs['index'] = ['GET', 'HEAD', 'POST'];
-      return $verbs;
-   }
-
-   // Поведедение для авторизованных юзеров или нет
    public function behaviors()
    {
 
@@ -132,6 +119,8 @@ class ActiveRestController extends ActiveController
 
       return $behaviors;
    }
+
+   // Поведедение для авторизованных юзеров или нет
 
    public function prepareDataProvider()
    {
@@ -171,35 +160,34 @@ class ActiveRestController extends ActiveController
       $approvedItems = [];
 
       // TODO: предусмотрена возможность получения мультидеревьев, но нужен рекурсивный анализ всей вложенности $data[tree]
-      if(isset($data['tree'])) {
+      if (isset($data['tree'])) {
 
          $MPBehavior = $DBModel->behaviors()["MaterializedPath"];
          $MPBehavior['itemAttribute'] = $AllTables[$current_table]['primaryKey'][0];
          $DB->attachBehavior('mp', $MPBehavior);
 
          // Тут нужно найти корневой элемент юзера [он может быть только один]
-         if(intval($data['tree']) === 0) {
+         if (intval($data['tree']) === 0) {
             $node = $DBModel->find()->andWhere([$DBModel->USER_ATTRIBUTE => \Yii::$app->user->id, $DBModel->behaviors['MaterializedPath']->depthAttribute => 0])->one();
             // Если корневого элемента нет - создаём его
-            if($node === null) {
+            if ($node === null) {
                $node = new $this->modelClass();
                $node->makeRoot();
                $node->save();
             }
-         }
-         else
-            $node = $DBModel::findOne(['id' =>$data['tree']]);
+         } else
+            $node = $DBModel::findOne(['id' => $data['tree']]);
 
-         if($node === null) throw new NotFoundHttpException("Tree id not found");
+         if ($node === null) throw new NotFoundHttpException("Tree id not found");
 
          $newq = $node->getDescendants();
          $DB->where($newq->where)->orderBy($newq->orderBy);
 
-         $approvedItems[] = $current_table .".". $MPBehavior['pathAttribute'];
-         $approvedItems[] = $current_table .".". $MPBehavior['depthAttribute'];
-         $approvedItems[] = $current_table .".". $MPBehavior['treeAttribute'];
-         $approvedItems[] = $current_table .".". $MPBehavior['itemAttribute'];
-         $approvedItems[] = $current_table .".". $MPBehavior['sortable']['sortAttribute'];
+         $approvedItems[] = $current_table . "." . $MPBehavior['pathAttribute'];
+         $approvedItems[] = $current_table . "." . $MPBehavior['depthAttribute'];
+         $approvedItems[] = $current_table . "." . $MPBehavior['treeAttribute'];
+         $approvedItems[] = $current_table . "." . $MPBehavior['itemAttribute'];
+         $approvedItems[] = $current_table . "." . $MPBehavior['sortable']['sortAttribute'];
 
       }
 
@@ -221,9 +209,9 @@ class ActiveRestController extends ActiveController
          foreach ($tsort as $sortitem) {
             if (substr($sortitem, 0, 1) === '-') {
                if (in_array(substr($sortitem, 1), $filteredFields))
-                  $DB->addOrderBy([$current_table.".".substr($sortitem, 1) => SORT_DESC]);
+                  $DB->addOrderBy([$current_table . "." . substr($sortitem, 1) => SORT_DESC]);
             } elseif (in_array($sortitem, $filteredFields))
-               $DB->addOrderBy([$current_table.".".$sortitem => SORT_ASC]);
+               $DB->addOrderBy([$current_table . "." . $sortitem => SORT_ASC]);
          }
       }
 
@@ -247,13 +235,13 @@ class ActiveRestController extends ActiveController
       $hasRelation = false;
 
       // По-умолчанию получаем все столбцы с доступами
-      if(!isset($data['fields']))
+      if (!isset($data['fields']))
          $data['fields'] = $DBModel->filterFieldsByRole('view', $DBModel, false, array_keys($DBModel->tableFields()), $approvedItems);
 
       // Объединяем поля с extfields
-      if(isset($data['extfields'])) {
-         foreach ($data['extfields'] as $fieldName=>$fieldVal)
-            if(!is_numeric($fieldName))
+      if (isset($data['extfields'])) {
+         foreach ($data['extfields'] as $fieldName => $fieldVal)
+            if (!is_numeric($fieldName))
                $data['fields'][$fieldName] = $fieldVal;
             else
                $data['fields'][$fieldVal] = array_keys($AllTables[$AllTables[$DBModel::tableName()]['related'][$fieldVal]['table']]['columns']);
@@ -282,13 +270,13 @@ class ActiveRestController extends ActiveController
                if (is_numeric($key)) {
                   $selectedFields[($tableAlias ?? "") . ("___" . $table::tableName() . "___" . $value)] = $table::tableName() . "." . $value;
                } elseif (is_string($key) && is_string($value)) {
-                  $selectedFields[($tableAlias ?? "") . ("___" . $table::tableName() . "___" . $key) ] = $table::tableName() . "." . $key;
+                  $selectedFields[($tableAlias ?? "") . ("___" . $table::tableName() . "___" . $key)] = $table::tableName() . "." . $key;
                } // релятивные поля
                elseif (is_array($value)) {
 
                   $aliasesArr = [];
 
-                  if(array_key_exists("____joinFilter____", $value) && $value['____joinFilter____']===true) {
+                  if (array_key_exists("____joinFilter____", $value) && $value['____joinFilter____'] === true) {
                      $relatedTable = [
                         'table' => $value['table'],
                         'class' => $AllTables[$value['table']]['class'],
@@ -296,36 +284,34 @@ class ActiveRestController extends ActiveController
                         'join' => $value,
                         'alias' => ''
                      ];
-                  }
-                  else
+                  } else
                      $relatedTable = $table->relatedFields()[$key];
 
                   $classTable = (new $relatedTable['class']);
 
-                  $joinAlias = "`__Alias__".count($joinFields)."__".$relatedTable['table']."__`";
-                  $newJoinPath = $joinPath.".".$key;
-                  $joinAliasesAll[$newJoinPath]=count($joinFields);
+                  $joinAlias = "`__Alias__" . count($joinFields) . "__" . $relatedTable['table'] . "__`";
+                  $newJoinPath = $joinPath . "." . $key;
+                  $joinAliasesAll[$newJoinPath] = count($joinFields);
 
                   $ON_param = '';
                   $ON_keys = [];
 
                   $joinType = "left";
 
-                  if(isset($relatedTable['join'])) {
-                     foreach ($value['on'] as $keyOn=>$valOn) {
-                        if(is_array($valOn))
-                           $valOn =  "`" . ($tableAlias ?? $table::tableName()) . "`." . $valOn['value'];
+                  if (isset($relatedTable['join'])) {
+                     foreach ($value['on'] as $keyOn => $valOn) {
+                        if (is_array($valOn))
+                           $valOn = "`" . ($tableAlias ?? $table::tableName()) . "`." . $valOn['value'];
 
-                        $ON_param.=" AND " . $joinAlias . "." . $keyOn . "=" . $valOn ;
+                        $ON_param .= " AND " . $joinAlias . "." . $keyOn . "=" . $valOn;
                         $ON_keys[] = $value['table'] . "." . $keyOn;// TODO: тут опасное присваивание
                      }
                      $ON_param = substr($ON_param, 5);
                      $joinAliasesAllFormat[$newJoinPath] = $value;
                      $joinType = $value['type'];
                      $value = $AllTables[$value['table']]['columns'];
-                     $fields[$key] = array_keys( $value );
-                  }
-                  else {
+                     $fields[$key] = array_keys($value);
+                  } else {
                      $ON_param = "`" . ($tableAlias ?? $table::tableName()) . "`." . $key . "=" . $joinAlias . "." . $relatedTable['key'];
                      $ON_keys[] = "`" . $relatedTable['table'] . "`." . $relatedTable['key'];
                   }
@@ -371,24 +357,24 @@ class ActiveRestController extends ActiveController
          $filteredFields = $DBModel->filterFieldsByRole('view', $DBModel, false, array_values($selectedFields), $approvedItems);
          $filteredFieldsArr = [];
          foreach ($selectedFields as $keyField => $field) {
-            if(!in_array($field, $filteredFields)) continue;
-            if(strpos($keyField, "__Alias__") === false)
+            if (!in_array($field, $filteredFields)) continue;
+            if (strpos($keyField, "__Alias__") === false)
                $filteredFieldsArr[$keyField] = $selectedFields[$keyField];
             else
-               $filteredFieldsArr[$keyField] = "`".explode("___", "___".$keyField)[1] . "__`." . explode(".", $selectedFields[$keyField])[1];
+               $filteredFieldsArr[$keyField] = "`" . explode("___", "___" . $keyField)[1] . "__`." . explode(".", $selectedFields[$keyField])[1];
          }
 
          $DB->select($filteredFieldsArr);
 
          // После фильтрации делаем join только одобренных полей
-         foreach ($joinFields as $keyF=>$field) {
+         foreach ($joinFields as $keyF => $field) {
             $findedJoin = true;
             foreach ($field[3] as $joinName) {
                if (!in_array(str_replace("`", "", $joinName), $filteredFields)) {
                   throw new Exception("Forbidden fields");
                }
             }
-            if($findedJoin) {
+            if ($findedJoin) {
                switch ($field[7]) {
                   case "left":
                      $DB->leftJoin($field[1] . " " . $field[4], $field[5], []);
@@ -411,7 +397,7 @@ class ActiveRestController extends ActiveController
          // find alias
          $findedTable = $current_table;
          $findedAliases = $this->findAlias($joinPath, $joinAliasesAll, $rowTables, $current_table);
-         if($findedAliases !== null) {
+         if ($findedAliases !== null) {
             $findedTable = $findedAliases[0];
             $current_table = $findedAliases[1];
          }
@@ -419,8 +405,8 @@ class ActiveRestController extends ActiveController
          foreach ($format as $key => &$value) {
             if (is_array($value)) {
                $filledRow[$key] = [];
-               $newJoinPath = $joinPath.".".$key;
-               if (isset($rowTables[$findedTable]) && array_key_exists($key,$rowTables[$findedTable]) && $rowTables[$findedTable][$key]===null)
+               $newJoinPath = $joinPath . "." . $key;
+               if (isset($rowTables[$findedTable]) && array_key_exists($key, $rowTables[$findedTable]) && $rowTables[$findedTable][$key] === null)
                   $filledRow[$key] = null;
                else {
 
@@ -429,14 +415,17 @@ class ActiveRestController extends ActiveController
                   // но можно и в $joinAliasesAllFormat поискать только те поля что сопоставляли, хотя это ничего не решает, и даже лучше когда все нули - это гарантирует что записи нет даже если ключ null
                   $findedNulls = true;
                   $findedAliasesNextStep = $this->findAlias($newJoinPath, $joinAliasesAll, $rowTables, $current_table);
-                  if($findedAliasesNextStep !== null) {
+                  if ($findedAliasesNextStep !== null) {
                      $findedTableNS = $findedAliasesNextStep[0];
                      $current_tableNS = $findedAliasesNextStep[1];
-                     foreach ($rowTables[$findedTableNS] as $rtNSKey=>$rtNSVal) {
-                        if($rtNSVal!==null) {$findedNulls = false; break;}
+                     foreach ($rowTables[$findedTableNS] as $rtNSKey => $rtNSVal) {
+                        if ($rtNSVal !== null) {
+                           $findedNulls = false;
+                           break;
+                        }
                      }
                   }
-                  if($findedNulls)
+                  if ($findedNulls)
                      $filledRow[$key] = null;
                   else
                      $recursive_output($value, $row, $filledRow[$key], isset($AllTables[$current_table]['related'][$key]['table']) ? $AllTables[$current_table]['related'][$key]['table'] : null, $rowTables, $tree_relates, $filledLinks, $isAppend, $newJoinPath);
@@ -444,7 +433,7 @@ class ActiveRestController extends ActiveController
             } else {
                $key = is_numeric($key) ? $value : $key;
 
-               if (isset($rowTables[$findedTable]) && array_key_exists($key,$rowTables[$findedTable])) {
+               if (isset($rowTables[$findedTable]) && array_key_exists($key, $rowTables[$findedTable])) {
                   $filledRow[$key] = $rowTables[$findedTable][$key];
                   switch ($AllTables[$current_table]['columns'][$key]) {
                      case "json":
@@ -475,15 +464,15 @@ class ActiveRestController extends ActiveController
             }
          }
 
-         $id = $row[$current_table.".".$AllTables[$current_table]['primaryKey'][0]] ?? null;
+         $id = $row[$current_table . "." . $AllTables[$current_table]['primaryKey'][0]] ?? null;
          $filledLinks[$id] = &$filledRow;
 
-         if(isset($row['m_parent']) && isset($filledLinks[$row['m_parent']])) {
-            if(!isset($filledLinks[$row['m_parent']]['children'])) $filledLinks[$row['m_parent']]['children'] = [];
+         if (isset($row['m_parent']) && isset($filledLinks[$row['m_parent']])) {
+            if (!isset($filledLinks[$row['m_parent']]['children'])) $filledLinks[$row['m_parent']]['children'] = [];
             $filledLinks[$row['m_parent']]['children'][] = &$filledRow;
             $isAppend = false;
          }
-         if(isset($row['m_parent']))
+         if (isset($row['m_parent']))
             $filledRow['m_parent'] = $row['m_parent'];
 
          return $filledRow;
@@ -495,12 +484,12 @@ class ActiveRestController extends ActiveController
          $items = $res->sender->data;
          $datagraph = [];
 
-         if($res->sender->statusCode < 400) {
+         if ($res->sender->statusCode < 400) {
 
             // Если режим отображения дерева, то отображаем его
             $tree_relates = [];
             $minDepth = -1;
-            if(isset($data['tree'])) {
+            if (isset($data['tree'])) {
                foreach ($items as &$row) {
                   $path = MaterializedPathBehavior::getParentPathInternal($row["___" . $current_table . "___" . [$MPBehavior['pathAttribute']][0]], ".", true);
                   $key = array_pop($path);
@@ -508,7 +497,7 @@ class ActiveRestController extends ActiveController
                   if (!isset($tree_relates[$current_table][$key])) $tree_relates[$current_table][$key] = [];
                   $tree_relates[$current_table][$key][] = &$row;
                   $row['m_parent'] = $key;
-                  if($minDepth === -1 || $minDepth>intval($row["___" . $current_table . "___" .$MPBehavior['depthAttribute']])) $minDepth = intval($row["___" . $current_table . "___" .$MPBehavior['depthAttribute']]);
+                  if ($minDepth === -1 || $minDepth > intval($row["___" . $current_table . "___" . $MPBehavior['depthAttribute']])) $minDepth = intval($row["___" . $current_table . "___" . $MPBehavior['depthAttribute']]);
                }
             }
 
@@ -523,29 +512,28 @@ class ActiveRestController extends ActiveController
                foreach ($row as $key => &$value) {
                   $splitted = explode("___", $key);
                   if (count($splitted) > 1) {
-                     if(strpos($key, "__Alias__") === false) {
+                     if (strpos($key, "__Alias__") === false) {
                         $rowTables[$splitted[1]][$splitted[2]] = &$value;
                         $thisRow[$splitted[1] . "." . $splitted[2]] = &$value;
-                     }
-                     else {
+                     } else {
                         $splittedAlias = explode("__", $splitted[0]);
                         $rowTables[$splitted[0]][$splitted[2]] = &$value;
                         $thisRow[$splitted[1] . "." . $splitted[2]] = &$value;
                      }
-                  }
-                  elseif ($key === 'm_parent')
+                  } elseif ($key === 'm_parent')
                      $thisRow[$key] = $value;
                }
 
-               if ($MPBehavior !== null && isset($tree_relates[$current_table][$thisRow[$current_table.".".$MPBehavior['itemAttribute']]])) {
-                  $thisRow['children'] = &$tree_relates[$current_table][$thisRow[$current_table.".".$MPBehavior['itemAttribute']]];
+               if ($MPBehavior !== null && isset($tree_relates[$current_table][$thisRow[$current_table . "." . $MPBehavior['itemAttribute']]])) {
+                  $thisRow['children'] = &$tree_relates[$current_table][$thisRow[$current_table . "." . $MPBehavior['itemAttribute']]];
                }
 
                // Заполняем модель
-               $result = []; $isAppend = true;
+               $result = [];
+               $isAppend = true;
                $recursive_output($data['fields'], $thisRow, $result, $current_table, $rowTables, $tree_relates, $filledLinks, $isAppend, "");
 
-               if($isAppend)
+               if ($isAppend)
                   $datagraph[] = &$result;
 
                unset($result);
@@ -633,8 +621,11 @@ class ActiveRestController extends ActiveController
       $DB = $this->ExtendQuery($DB, $data);
 
       // Параметры только для экспорта
-      if(isset($data['export'])) {
-         $pagination['pageSize'] = 1000;
+      if (isset($data['export'])) {
+         $pagination = [
+            'page' => 0,
+            'pageSize' => 1000
+         ];
          $DB = $this->exportQueryConfigure($DB);
       }
 
@@ -647,7 +638,40 @@ class ActiveRestController extends ActiveController
       ]);
    }
 
-   public function ExportAsXLSX($datagraph, $data) {
+   /**
+    * Поиск алиаса join-поля
+    * @param $joinPath
+    * @param $joinAliasesAll
+    * @param $rowTables
+    * @param $current_table
+    * @return array|null
+    * @throws ErrorException
+    */
+   public function findAlias($joinPath, &$joinAliasesAll, &$rowTables, $current_table)
+   {
+      $findedTable = null;
+      if (strlen($joinPath) > 0) {
+
+         $findedAliasN = array_key_exists($joinPath, $joinAliasesAll) ? $joinAliasesAll[$joinPath] : null;
+         if ($findedAliasN === null) throw  new ErrorException("Неизвестное поведение при подборе алиаса");
+
+         foreach ($rowTables as $rtKey => $rtValue) {
+            if (strpos($rtKey, "__Alias__") !== false) {
+               $splittedAlias = explode("__", $rtKey);
+               if (intval($splittedAlias[2]) === $findedAliasN) {
+                  $findedTable = $rtKey;
+                  if ($current_table === null) $current_table = $splittedAlias[3];
+                  return [$findedTable, $current_table];
+               }
+
+            }
+         }
+      }
+      return null;
+   }
+
+   public function ExportAsXLSX($datagraph, $data)
+   {
       $export_params = [
          'class' => 'codemix\excelexport\ExcelFile',
          'fileOptions' => ['directory' => \Yii::getAlias('@runtime')],
@@ -655,7 +679,7 @@ class ActiveRestController extends ActiveController
             // todo: custom sheet name
             'info' => [
                'class' => 'codemix\excelexport\ExcelSheet',
-               'data'=> $datagraph,
+               'data' => $datagraph,
                'titles' => $data['export']['titles']
             ]
          ]
@@ -669,34 +693,16 @@ class ActiveRestController extends ActiveController
    }
 
    /**
-    * Поиск алиаса join-поля
-    * @param $joinPath
-    * @param $joinAliasesAll
-    * @param $rowTables
-    * @param $current_table
-    * @return array|null
-    * @throws ErrorException
+    * Настройка ответа: данные, формат файла и его стиль
+    * @param $params
+    * @param $default_sheetname
+    * @param $format
+    * @param $model
+    * @return mixed
     */
-   public function findAlias($joinPath, &$joinAliasesAll, &$rowTables, $current_table) {
-      $findedTable = null;
-      if(strlen($joinPath)>0) {
-
-         $findedAliasN = array_key_exists($joinPath, $joinAliasesAll) ? $joinAliasesAll[$joinPath] : null;
-         if($findedAliasN === null) throw  new ErrorException("Неизвестное поведение при подборе алиаса");
-
-         foreach ($rowTables as $rtKey=>$rtValue) {
-            if(strpos($rtKey, "__Alias__")!== false) {
-               $splittedAlias = explode("__", $rtKey);
-               if(intval($splittedAlias[2]) === $findedAliasN) {
-                  $findedTable = $rtKey;
-                  if($current_table === null) $current_table = $splittedAlias[3];
-                  return [$findedTable, $current_table];
-               }
-
-            }
-         }
-      }
-      return null;
+   public function exportResultsConfigure(&$params, $default_sheetname, $format, $model)
+   {
+      return $params;
    }
 
    /**
@@ -715,20 +721,20 @@ class ActiveRestController extends ActiveController
     * @param $model
     * @return mixed
     */
-   public function exportQueryConfigure(&$model) {
+   public function exportQueryConfigure(&$model)
+   {
       return $model;
    }
 
    /**
-    * Настройка ответа: данные, формат файла и его стиль
-    * @param $params
-    * @param $default_sheetname
-    * @param $format
-    * @param $model
-    * @return mixed
+    * Добавляем возможность запостить json в index action
+    * @return array
     */
-   public function exportResultsConfigure(&$params, $default_sheetname, $format, $model) {
-      return $params;
+   protected function verbs()
+   {
+      $verbs = parent::verbs();
+      $verbs['index'] = ['GET', 'HEAD', 'POST'];
+      return $verbs;
    }
 
 
