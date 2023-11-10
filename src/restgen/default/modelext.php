@@ -77,6 +77,9 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'edit' => '*',
                 'delete' => '*',
                 'rowsFilter' => function($model){
+                   /**
+                    * @var $model ActiveQuery
+                    */
                    <?php if(!$USER_FILL &&
                       $className!=='UserSettings' &&
                       $className!=='UserNotifications' &&
@@ -98,6 +101,9 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'edit' => [],
                 'delete' => null,
                 'rowsFilter' => function($model){
+                   /**
+                    * @var $model ActiveQuery
+                    */
                 },
             ],
             'Admin' => [
@@ -106,6 +112,20 @@ class <?=$className?> extends models\Table<?= $className ?>
                 'edit' => '*',
                 'delete' => '*',
                 'rowsFilter' => function($model){
+                   /**
+                    * @var $model ActiveQuery
+                    */
+                },
+            ],
+            'Manager' => [
+                'view' => '*',
+                'create' => '*',
+                'edit' => '*',
+                'delete' => '*',
+                'rowsFilter' => function($model){
+                   /**
+                    * @var $model ActiveQuery
+                    */
                 },
             ],
         ];
