@@ -121,7 +121,7 @@ class DefaultTable extends ActiveRecord
             }
          }
 
-         if($mode === 'create' && !isset($rules[$role][$mode])) $mode = 'edit';
+         if($mode === 'create' && (isset($rules[$role]) && array_key_exists($mode, $rules[$role])) === false ) $mode = 'edit';
 
          // Обрабатываем нуль для любого действия
          if($rules[$role][$mode] === null) throw new ForbiddenHttpException("Forbidden");
