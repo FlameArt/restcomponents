@@ -95,6 +95,7 @@ class UploadBehavior extends \yii\base\Behavior
                            $attrValues[] = [
                               'file' => $newFilename,
                               'id' => $thisFile->id,
+                              'name' => $thisFile->name
                            ];
 
                            if (count($this->owner->errors) > 0)
