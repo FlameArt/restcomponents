@@ -53,23 +53,31 @@ class CreateAction extends Action
       $model = new $this->modelClass([
          'scenario' => $this->scenario,
       ]);
+      $tableFields = $model->tableFields();
 
       $data = Json::decode(\Yii::$app->request->getRawBody(), true);
 
       // Сравниваем полученные для изменения поля с разрешёнными
       $accepted_fields = $model->filterFieldsByRole('create', $model, false, array_keys($data));
 
-      if(count($accepted_fields) === 0)
+      if (count($accepted_fields) === 0)
          throw new ForbiddenHttpException("Forbidden");
 
       // Прописываем чистый массив данных [вместо unset], чтобы не проскочили рандомные вариации имён, которые не итерируются
       // Если есть хоть 1 разрешённое поле для вставки - создаём запись, это поможет не учитывать кастомные поля, которые создаются в JS-моделях
       $cleanData = [];
       foreach ($data as $key => $value)
-         if (in_array($key, $accepted_fields)) $cleanData[$key] = $value;
+         if (in_array($key, $accepted_fields)) {
+
+            $cleanData[$key] = $value;
+
+            // преобразуем дату из формата js
+            if (in_array($tableFields[$key], ['timestamp', 'datetime'])) $cleanData[$key] = str_replace(["T", "Z"], [" ", ""], $value);
+
+         }
       $data = $cleanData;
 
-      $model->load(['form'=>$data], 'form');
+      $model->load(['form' => $data], 'form');
 
       $modelClass = null;
       $AllTables = \common\models\DB\models\Tables::all;
