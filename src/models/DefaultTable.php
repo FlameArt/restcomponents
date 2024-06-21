@@ -253,7 +253,8 @@ class DefaultTable extends ActiveRecord
    {
 
       $arr = [];
-      $need_fields = (Yii::$app->controller)->extendFields;
+      $need_fields = [];
+      if(isset((Yii::$app->controller)->extendFields)) $need_fields = (Yii::$app->controller)->extendFields;
 
       foreach ($need_fields as $field)
          $arr[] = $field . "_";
